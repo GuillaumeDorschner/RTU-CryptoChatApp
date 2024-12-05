@@ -10,40 +10,38 @@
 
 # Introduction
 
-CryptoChatApp is a messaging application demonstrating cryptographic principles implemented from scratch. Without relying on external cryptographic libraries, it explores the fundamentals of **RSA** (asymmetric encryption) and **Elliptic-Curve Cryptography (ECC)** (symmetric encryption). Built using **React.js** and **Node.js**, the app supports real-time messaging through WebSocket. For more detailed information, check out the [Diagrams & Explanations](#diagrams--explanations) section.
+CryptoChatApp is a messaging application demonstrating cryptographic principles implemented from scratch. Without relying on external cryptographic libraries, it explores the fundamentals of **Elliptic-curve Diffie–Hellman** (asymmetric encryption) for key exchange and **AES** (symmetric encryption) for message security. Built using **React.js** and **Node.js**, the app supports real-time messaging through WebSocket. For more detailed information, check out the [Diagrams & Explanations](#diagrams--explanations) section.
 
-# Demo
+## Demo
 
 ![CryptoChatApp Demo](https://example.com/demo.gif)
 
-# Getting Started
+## Getting Started
 
-> **Note**: This project is for educational purposes and is not intended for production use.
+> **Note**: This project is for educational purposes and should not be used in production.
 
-## Installation
+### Installation
 
-1. Download the zip file [here](gitjisjfd.com) or clone the repository:
+1. Clone the repository:
 
    ```bash
    git clone https://github.com/GuillaumeDorschner/CryptoChatApp.git
    cd CryptoChatApp
    ```
 
-2. Start the app with Docker:
+2. Start the application with Docker:
 
    ```bash
    docker compose up
    ```
 
-3. Open the app in your browser at `http://localhost:3000`.
-
-# Diagrams & Explanations
+3. Open your browser and visit `http://localhost:3000`.
 
 ## Key Features
 
-1. **RSA**: Used for secure key exchange between users.
-2. **ECC**: Handles message encryption and decryption.
-3. **WebSocket**: Enables real-time communication without a login system.
+1. **ECDH**: Used to securely exchange the symmetric AES key between users.
+2. **AES**: Ensures message confidentiality with fast and secure symmetric encryption.
+3. **WebSocket**: Enables real-time communication without requiring user accounts.
 
 ## Message Encryption Flow
 
@@ -53,26 +51,53 @@ sequenceDiagram
     participant B as Bob (User)
     participant S as Server
 
-    Note over A,S: Key Exchange Phase
-        A->>S: RSA Public Key
-        S-->>B: Alice's RSA Public Key
-        B-->>S: ECC Public Key encrypted with Alice's RSA Key
-        S-->>A: Bob's ECC Public Key
+    Note over A,S: ECDH Key Exchange Phase
+        A->>S: ECDH Public Key
+        S-->>B: Alice's ECDH Public Key
+        B->>S: ECDH Public Key
+        S-->>A: Bob's ECDH Public Key
+
+    Note over A,B: AES Key Exchange Phase
+        A->>A: Generate AES Symmetric Key
+        A->>A: Encrypt AES Key with Bob's ECDH Public Key
+        A->>B: Send Encrypted AES Key (relayed by Server)
+        B->>B: Decrypt AES Key with ECDH Private Key
 
     Note over A,B: Messaging Phase
-        A->>B: Message encrypted with ECC Key
-        B->>A: Response encrypted with ECC Key
+        A->>B: Message encrypted with AES
+        B->>B: Decrypt Message with AES
+        B->>A: Response encrypted with AES
 ```
+
+## Cryptographic Concepts
+
+### Why Use ECDH?
+
+Elliptic-Curve Diffie-Hellman (ECDH) is chosen for its high security with smaller key sizes compared to RSA or traditional Diffie-Hellman, making it faster and more efficient.  
+📹 [Watch: Elliptic Curve Cryptography Explained](https://youtu.be/NF1pwjL9-DE)
+
+### What is AES?
+
+AES (Advanced Encryption Standard) is a symmetric encryption algorithm widely used for its speed and security.  
+📹 [Watch: AES Explained](https://youtu.be/O4xNJsjtN6E)
+
+### Common Issues with ECC
+
+ECC, while secure, has implementation challenges and requires careful attention to avoid side-channel attacks.  
+📹 [Watch: Problems with ECC](https://youtu.be/nybVFJVXbww)
+
+### Learn Cryptographic Basics
+
+For an introduction to public and private key cryptography, check out this beginner-friendly explanation:  
+📹 [Watch: Diffie-Hellman and ECC with Color Analogy](https://youtu.be/NmM9HA2MQGI)
 
 ## Technology Stack
 
-All the code is written in **JavaScript**, with the following components:
-
 - **Frontend**: React.js
 - **Backend**: Node.js
-- **Real-time Messaging**: WebSocket (with `ws`)
-- **Custom Cryptography**: RSA and ECC implemented manually.
+- **Real-time Messaging**: WebSocket (via `ws`)
+- **Custom Cryptography**: ECDH and AES implemented manually.
 
-# License
+## License
 
 This project is licensed under the MIT License.
