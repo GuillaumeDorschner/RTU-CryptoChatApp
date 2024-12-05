@@ -1,0 +1,17 @@
+{
+  "name": "CryptoChatApp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"pnpm --prefix client dev\" \"pnpm --prefix server dev\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@9.14.4",
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}
