@@ -35,7 +35,7 @@ sequenceDiagram
     participant A as Alice (User)
     participant S as Server
 
-    A-->>S: Connect to the server (username)
+    A-->>S: Connect to the server
     S-->>A: Return welcome page
     A-->>A: Does browser have cookie ID?
     Note over A: No
@@ -46,44 +46,48 @@ sequenceDiagram
     Note over A: Yes
     A-->>A: Keep session active
     A-->>A: User connected
+    A->>S: Open websocket connection
+    S->>S: Store websocket connection in map
 ```
 
 ### **2. Key Exchange Workflow**
 
-Securely exchange ECDH keys and establish an AES key for chat encryption.
+Securely exchange ECDH keys and establish an AES key for chat encryption. [Wikipedia](https://en.wikipedia.org/wiki/Elliptic-curve_Diffie–Hellman)
 
 ```mermaid
 sequenceDiagram
     participant A as Alice (User)
-    participant B as Bob (User)
     participant S as Server
+    participant B as Bob (User)
 
-    Note over A,S: Key Exchange Phase
+    Note over A,B: Key Exchange Phase
     A->>S: Send ECDH Public Key
     S-->>B: Relay Alice's ECDH Public Key
     B->>S: Send ECDH Public Key
     S-->>A: Relay Bob's ECDH Public Key
-    A->>A: Compute Shared Key with Bob's Public Key
-    B->>B: Compute Shared Key with Alice's Public Key
-    Note over A,B: AES Key Synchronization
-    A->>A: Generate AES Key
-    A->>A: Encrypt AES Key with Shared ECDH Key
-    A->>B: Send Encrypted AES Key
+    A->>A: Compute Shared Secret with Bob's Public Key
+    B->>B: Compute Shared Secret with Alice's Public Key
+    A->>A: Derive AES Key from Shared Secret
+    B->>B: Derive AES Key from Shared Secret
 ```
 
 ### **3. Messaging Workflow**
 
-Messages are securely encrypted and exchanged between users using the AES key.
+The server acts solely as a relay and does not decrypt (can't it's end to end encrypted) or store messages. Messages are securely encrypted and exchanged between users using AES. AES ensures message confidentiality by using a symmetric key derived from the ECDH shared secret
 
 ```mermaid
 sequenceDiagram
     participant A as Alice (User)
+    participant S as Server
     participant B as Bob (User)
 
     Note over A,B: Messaging Phase
-    A->>B: Send message encrypted with AES
+    A->>S: Send encrypted message for Bob (via AES)
+    S-->>B: Relay encrypted message for Bob (via AES)
     B->>B: Decrypt message using AES
-    B->>A: Send response encrypted with AES
+    B->>S: Send encrypted message for Alice (via AES)
+    S-->>A: Relay encrypted message for Alice (via AES)
+    A->>A: Decrypt message using AES
 ```
 
 ## **Architecture**
@@ -94,6 +98,8 @@ This diagram outlines the key components of the system and their interactions.
 
 ```mermaid
 classDiagram
+
+
     class Client {
         +sendMessage(message: String): void
         +receiveMessage(message: String): void
@@ -103,26 +109,26 @@ classDiagram
         +clearLocalStorage(): void
         +deleteChat(chatId: String): void
     }
-
-    class Server {
-        +generateUserId(username: String): String
-        +relayPublicKey(senderId: String, recipientId: String, publicKey: String): void
-        +relayEncryptedMessage(senderId: String, recipientId: String, encryptedMessage: String): void
-    }
-
     class ECDH {
         +generateKeyPair(): KeyPair
         +computeSharedKey(privateKey: String, publicKey: String): String
     }
 
-    class AES {
-        +encrypt(data: String, key: String): String
-        +decrypt(data: String, key: String): String
-    }
-
     class KeyPair {
         +publicKey: String
         +privateKey: String
+    }
+
+    class Server {
+        +generateUserId(username: String): String
+        +relayPublicKey(senderId: String, recipientId: String, publicKey: String): void
+        +relayEncryptedMessage(senderId: String, recipientId: String, encryptedMessage: String): void
+        +clearUserSession(userId: String): void
+    }
+
+    class AES {
+        +encrypt(data: String, key: String): String
+        +decrypt(data: String, key: String): String
     }
 
     class ChatManager {
@@ -145,7 +151,6 @@ classDiagram
 
     Client --|> ECDH
     Client --|> AES
-    Server --> Client
     Client --> ChatManager
     ChatManager --> Chat
     Chat --> Message
@@ -155,5 +160,5 @@ classDiagram
 
 - **Cookies**: Store the user's unique ID to persist sessions.
   - if clear the id / user / discution will be lost.
-- **Local Storage**: Store chat discussions and their associated encryption keys (ECDH and AES).
+- **Local Storage**: Store chat discussions and their associated encryption key.
   - id discussions are deleted the chat and the key will be lost.

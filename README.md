@@ -10,7 +10,7 @@
 
 # Introduction
 
-CryptoChatApp is a messaging application demonstrating cryptographic principles implemented from scratch. Without relying on external cryptographic libraries, it explores the fundamentals of **Elliptic-curve Diffie–Hellman** (asymmetric encryption) for key exchange and **AES** (symmetric encryption) for message security. Built using **React.js** and **Node.js**, the app supports real-time messaging through WebSocket. For more detailed information, check out the [diagram](#message-encryption-flow) section.
+CryptoChatApp is a messaging application demonstrating cryptographic principles implemented from scratch. Without relying on external cryptographic libraries, it explores the fundamentals of **Elliptic-curve Diffie–Hellman** (asymmetric encryption) for key exchange and **AES** (symmetric encryption) for message security. Built using **React.js** and **Node.js**, the app supports real-time messaging through WebSocket. Refer to the [Message Encryption Flow](#message-encryption-flow) section for detailed cryptographic workflows.
 
 ## Demo
 
@@ -19,6 +19,10 @@ CryptoChatApp is a messaging application demonstrating cryptographic principles 
 ## Getting Started
 
 > **Note**: This project is for educational purposes and should not be used in production.
+
+### Prerequisites
+
+- Ensure [Docker](https://www.docker.com/) is installed on your system.
 
 ### Installation
 
@@ -40,35 +44,36 @@ CryptoChatApp is a messaging application demonstrating cryptographic principles 
 ## Key Features
 
 1. **ECDH**: Used to securely exchange the symmetric AES key between users.
-2. **AES**: Ensures message confidentiality with fast and secure symmetric encryption.
-3. **WebSocket**: Enables real-time communication without requiring user accounts.
+2. **AES**: AES ensures message confidentiality by using a symmetric key derived from the ECDH shared secret.
+3. **WebSocket**: Facilitates real-time encrypted messaging by relaying data between users, without requiring server-side storage of messages.
 
 ## Message Encryption Flow
+
+The server acts solely as a relay and does not decrypt or store messages.
 
 ```mermaid
 sequenceDiagram
     participant A as Alice (User)
-    participant B as Bob (User)
     participant S as Server
+    participant B as Bob (User)
 
-    Note over A,S: ECDH Key Exchange Phase
-        A->>S: ECDH Public Key
-        S-->>B: Alice's ECDH Public Key
-        B->>S: ECDH Public Key
-        S-->>A: Bob's ECDH Public Key
-        A->>A: Compute Shared Key with Bob's Public Key
-        B->>B: Compute Shared Key with Alice's Public Key
-
-    Note over A,B: AES Key Exchange Phase
-        A->>A: Generate AES Symmetric Key
-        A->>A: Encrypt AES Key with Bob's ECDH Public Key
-        A->>B: Send Encrypted AES Key (relayed by Server)
-        B->>B: Decrypt AES Key with ECDH Private Key
+    Note over A,B: Key Exchange Phase
+    A->>S: Send ECDH Public Key
+    S-->>B: Relay Alice's ECDH Public Key
+    B->>S: Send ECDH Public Key
+    S-->>A: Relay Bob's ECDH Public Key
+    A->>A: Compute Shared Secret with Bob's Public Key
+    B->>B: Compute Shared Secret with Alice's Public Key
+    A->>A: Derive AES Key from Shared Secret
+    B->>B: Derive AES Key from Shared Secret
 
     Note over A,B: Messaging Phase
-        A->>B: Message encrypted with AES
-        B->>B: Decrypt Message with AES
-        B->>A: Response encrypted with AES
+    A->>S: Send encrypted message for Bob (via AES)
+    S-->>B: Relay encrypted message for Bob (via AES)
+    B->>B: Decrypt message using AES
+    B->>S: Send encrypted message for Alice (via AES)
+    S-->>A: Relay encrypted message for Alice (via AES)
+
 ```
 
 For a detailed explanation of this project, refer to the [Technical Design System](./Technical%20Design%20System.md).
