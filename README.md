@@ -10,7 +10,7 @@
 
 # Introduction
 
-CryptoChatApp is a messaging application demonstrating cryptographic principles implemented from scratch. Without relying on external cryptographic libraries, it explores the fundamentals of **Elliptic-curve Diffie–Hellman** (asymmetric encryption) for key exchange and **AES** (symmetric encryption) for message security. Built using **React.js** and **Node.js**, the app supports real-time messaging through WebSocket. For more detailed information, check out the [Diagrams & Explanations](#diagrams--explanations) section.
+CryptoChatApp is a messaging application demonstrating cryptographic principles implemented from scratch. Without relying on external cryptographic libraries, it explores the fundamentals of **Elliptic-curve Diffie–Hellman** (asymmetric encryption) for key exchange and **AES** (symmetric encryption) for message security. Built using **React.js** and **Node.js**, the app supports real-time messaging through WebSocket. For more detailed information, check out the [diagram](#message-encryption-flow) section.
 
 ## Demo
 
@@ -56,6 +56,8 @@ sequenceDiagram
         S-->>B: Alice's ECDH Public Key
         B->>S: ECDH Public Key
         S-->>A: Bob's ECDH Public Key
+        A->>A: Compute Shared Key with Bob's Public Key
+        B->>B: Compute Shared Key with Alice's Public Key
 
     Note over A,B: AES Key Exchange Phase
         A->>A: Generate AES Symmetric Key
@@ -68,6 +70,8 @@ sequenceDiagram
         B->>B: Decrypt Message with AES
         B->>A: Response encrypted with AES
 ```
+
+For a detailed explanation of this project, refer to the [Technical Design System](./Technical%20Design%20System.md).
 
 ## Cryptographic Concepts
 
