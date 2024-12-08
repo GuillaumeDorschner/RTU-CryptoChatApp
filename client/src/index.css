@@ -1,3 +1,21 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --color-bg-global: #efefef;
+  --color-bg-card: #ffffff;
+  --color-text: #161619;
+  --color-text-inverse: #ffffff;
+  --color-bubble-chat: #f4f6f8;
+  --color-focus: #2a82fe;
+}
+
+[data-theme='dark'] {
+  --color-bg-global: #1e1e1e;
+  --color-bg-card: #292929;
+  --color-text: #f5f5f5;
+  --color-text-inverse: #000000;
+  --color-bubble-chat: #333333;
+  --color-focus: #5294e2;
+}

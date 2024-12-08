@@ -1,4 +1,5 @@
-import ChatList from './ChatList';
+import NewChat from './NewChat';
+import Chat from './Chat';
 
 const Sidebar = () => {
   let chats = [
@@ -20,9 +21,10 @@ const Sidebar = () => {
   ];
 
   return (
-    <div className="sidebar">
+    <div className="m-4">
+      <NewChat />
       {chats.map(function (chat) {
-        return <ChatList {...chat} />;
+        return <Chat {...chat} />;
       })}
     </div>
   );
