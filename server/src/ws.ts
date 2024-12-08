@@ -1,6 +1,13 @@
 import { WebSocketServer } from 'ws';
 
-export function setupWebSocket(server: any) {
+const userIdToSocket = new Map<string, WebSocket>();
+
+interface IncomingMessage {
+  type: string;
+  data?: any;
+}
+
+export function WebSocketServer(server: HttpServer) {
   const wss = new WebSocketServer({ server });
 
   wss.on('connection', (ws) => {
