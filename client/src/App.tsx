@@ -1,9 +1,10 @@
 import './App.css';
+import Sidebar from './components/Sidebar';
 
 function App() {
   return (
-    <div className="bg-blue-800 text-white text-center p-4">
-      <h1 className="text-2xl font-bold">Hello world!</h1>
+    <div className="bg-white p-6 flex flex-grow">
+      <Sidebar />
     </div>
   );
 }
