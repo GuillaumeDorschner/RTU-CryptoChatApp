@@ -11,12 +11,12 @@ function App() {
   const [showSetting, setShowSetting] = useState(true);
 
   return (
-    <div className="h-screen w-full flex overflow-hidden bg-bgGlobal">
-      <div className="flex-shrink-0 w-1/5 bg-focus m-6 text-white">
+    <div className="h-screen w-full flex overflow-hidden bg-bgGlobal p-4 text-text">
+      <div className="flex-shrink-0 w-1/5 ">
         <Sidebar />
       </div>
 
-      <div className="flex flex-col m-6 flex-grow bg-focus">
+      <div className="flex flex-col mx-6 flex-grow p-4 rounded-lg bg-bgCard">
         <ChatHeader />
         <div className="flex-grow overflow-y-auto">
           <ChatMessages />
@@ -25,7 +25,7 @@ function App() {
       </div>
 
       {showSetting && (
-        <div className="flex-shrink-0 w-1/4 m-6 bg-focus">
+        <div className="flex-shrink-0 w-1/4 p-4 mb-4 rounded-lg bg-bgCard">
           <ChatSettingsDrawer />
         </div>
       )}

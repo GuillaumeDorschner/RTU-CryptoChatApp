@@ -1,8 +1,14 @@
 import NewChat from './NewChat';
 import Chat from './Chat';
 
+interface ChatData {
+  id: number;
+  name: string;
+  lastMessage: string;
+}
+
 const Sidebar = () => {
-  let chats = [
+  const chats: ChatData[] = [
     {
       id: 1,
       name: 'Guillaume',
@@ -18,14 +24,81 @@ const Sidebar = () => {
       name: 'Emily',
       lastMessage: 'How are you doing?',
     },
+    {
+      id: 3,
+      name: 'Emily',
+      lastMessage: 'How are you doing?',
+    },
+    {
+      id: 3,
+      name: 'Emily',
+      lastMessage: 'How are you doing?',
+    },
+    {
+      id: 3,
+      name: 'Emily',
+      lastMessage: 'How are you doing?',
+    },
+    {
+      id: 3,
+      name: 'Emily',
+      lastMessage: 'How are you doing?',
+    },
+    {
+      id: 3,
+      name: 'Emily',
+      lastMessage: 'How are you doing?',
+    },
+    {
+      id: 3,
+      name: 'Emily',
+      lastMessage: 'How are you doing?',
+    },
+    {
+      id: 3,
+      name: 'Emily',
+      lastMessage: 'How are you doing?',
+    },
+    {
+      id: 3,
+      name: 'Emily',
+      lastMessage: 'How are you doing?',
+    },
+    {
+      id: 3,
+      name: 'Emily',
+      lastMessage: 'How are you doing?',
+    },
+    {
+      id: 3,
+      name: 'Emily',
+      lastMessage: 'How are you doing?',
+    },
+    {
+      id: 3,
+      name: 'Emily',
+      lastMessage: 'How are you doing?',
+    },
+    {
+      id: 3,
+      name: 'Emily',
+      lastMessage: 'How are you doing?',
+    },
+    {
+      id: 3,
+      name: 'Emily',
+      lastMessage: 'How are you doing?',
+    },
   ];
 
   return (
-    <div className="m-4">
+    <div className=" h-full flex flex-col">
       <NewChat />
-      {chats.map(function (chat) {
-        return <Chat {...chat} />;
-      })}
+      <div className="max-h-max overflow-y-auto">
+        {chats.map((chat) => (
+          <Chat key={chat.id} id={chat.id} name={chat.name} lastMessage={chat.lastMessage} />
+        ))}
+      </div>
     </div>
   );
 };
