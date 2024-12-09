@@ -1,10 +1,15 @@
 import NewChat from './NewChat';
 import Chat from './Chat';
 
+interface Message {
+  user: number;
+  message: string;
+}
+
 interface ChatData {
   id: number;
   name: string;
-  lastMessage: string;
+  messages: Message[];
 }
 
 const Sidebar = () => {
@@ -12,82 +17,21 @@ const Sidebar = () => {
     {
       id: 1,
       name: 'Guillaume',
-      lastMessage: 'This is the last message',
+      messages: [
+        { user: 1, message: 'Hello Guillaume!' },
+        { user: 0, message: 'Hi there, how are you?' },
+        { user: 0, message: 'Are you available for a call?' },
+        { user: 1, message: 'Sure, let’s do it!' },
+        { user: 0, message: 'Great, sending you the link.' },
+      ],
     },
     {
       id: 2,
       name: 'John',
-      lastMessage: 'Hello there!',
-    },
-    {
-      id: 3,
-      name: 'Emily',
-      lastMessage: 'How are you doing?',
-    },
-    {
-      id: 3,
-      name: 'Emily',
-      lastMessage: 'How are you doing?',
-    },
-    {
-      id: 3,
-      name: 'Emily',
-      lastMessage: 'How are you doing?',
-    },
-    {
-      id: 3,
-      name: 'Emily',
-      lastMessage: 'How are you doing?',
-    },
-    {
-      id: 3,
-      name: 'Emily',
-      lastMessage: 'How are you doing?',
-    },
-    {
-      id: 3,
-      name: 'Emily',
-      lastMessage: 'How are you doing?',
-    },
-    {
-      id: 3,
-      name: 'Emily',
-      lastMessage: 'How are you doing?',
-    },
-    {
-      id: 3,
-      name: 'Emily',
-      lastMessage: 'How are you doing?',
-    },
-    {
-      id: 3,
-      name: 'Emily',
-      lastMessage: 'How are you doing?',
-    },
-    {
-      id: 3,
-      name: 'Emily',
-      lastMessage: 'How are you doing?',
-    },
-    {
-      id: 3,
-      name: 'Emily',
-      lastMessage: 'How are you doing?',
-    },
-    {
-      id: 3,
-      name: 'Emily',
-      lastMessage: 'How are you doing?',
-    },
-    {
-      id: 3,
-      name: 'Emily',
-      lastMessage: 'How are you doing?',
-    },
-    {
-      id: 3,
-      name: 'Emily',
-      lastMessage: 'How are you doing?',
+      messages: [
+        { user: 1, message: 'Hey John!' },
+        { user: 0, message: 'What’s up?' },
+      ],
     },
   ];
 
@@ -96,7 +40,7 @@ const Sidebar = () => {
       <NewChat />
       <div className="max-h-max overflow-y-auto">
         {chats.map((chat) => (
-          <Chat key={chat.id} id={chat.id} name={chat.name} lastMessage={chat.lastMessage} />
+          <Chat key={chat.id} id={chat.id} name={chat.name} lastMessage={chat.messages[0].message} />
         ))}
       </div>
     </div>
