@@ -1,28 +1,58 @@
 import './App.css';
+import { useState, useEffect } from 'react';
+import { useWebSocket } from './hooks/useWebSocket';
+
 import Sidebar from './components/Sidebar';
 import ChatHeader from './components/ChatHeader';
 import ChatMessages from './components/ChatMessages';
 import ChatInput from './components/ChatInput';
 import ChatSettingsDrawer from './components/ChatSettingsDrawer';
 
-import { useState } from 'react';
-
 function App() {
   const [showSetting, setShowSetting] = useState(true);
-  const [login, setLogin] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  const handleWebSocketMessage = (event: MessageEvent) => {
+    const message = JSON.parse(event.data);
+
+    switch (message.type) {
+      case 'userId':
+        setUserId(message.userId);
+        console.log('User ID received:', message.userId);
+        break;
+      case 'publicKey':
+        console.log('Public key received:', message);
+        break;
+      // case 'encryptedMessage':
+      //   setMessages((prev) => [...prev, message]);
+      //   break;
+      default:
+        console.warn('Unknown message type:', message.type);
+    }
+  };
+
+  const ws = useWebSocket('ws://localhost:3001', handleWebSocketMessage);
+
+  const sendMessage = (data: object) => {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify(data));
+    } else {
+      console.warn('WebSocket is not connected.');
+    }
+  };
 
   useEffect(() => {
     const cookieId = document.cookie.split('; ').find((row) => row.startsWith('userId='));
     if (cookieId) {
-      setLogin(true);
+      setUserId(cookieId.split('=')[1]);
     } else {
-      setLogin(false);
+      setUserId(null);
     }
   });
 
   return (
     <div className="h-screen w-full flex overflow-hidden bg-bgGlobal p-4 text-text">
-      {!login ? (
+      {!userId ? (
         <>
           <input type="Username" />
         </>
