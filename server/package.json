@@ -20,6 +20,7 @@
   "dependencies": {
     "express": "^4.21.1",
     "shared": "link:../shared",
+    "uuid": "^11.0.3",
     "ws": "^8.18.0"
   }
 }
