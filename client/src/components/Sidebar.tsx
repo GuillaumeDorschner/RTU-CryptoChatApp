@@ -40,7 +40,12 @@ const Sidebar = () => {
       <NewChat />
       <div className="max-h-max overflow-y-auto">
         {chats.map((chat) => (
-          <Chat key={chat.id} id={chat.id} name={chat.name} lastMessage={chat.messages[0].message} />
+          <Chat
+            key={chat.id}
+            id={chat.id}
+            name={chat.name}
+            lastMessage={chat.messages[chat.messages.length - 1].message}
+          />
         ))}
       </div>
     </div>

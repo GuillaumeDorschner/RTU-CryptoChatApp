@@ -25,7 +25,7 @@ function App() {
       </div>
 
       {showSetting && (
-        <div className="flex-shrink-0 w-1/4 p-4 mb-4 rounded-lg bg-bgCard">
+        <div className="flex-shrink-0 w-1/4 p-4 rounded-lg bg-bgCard">
           <ChatSettingsDrawer />
         </div>
       )}
