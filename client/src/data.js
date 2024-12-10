@@ -9,37 +9,31 @@ const data = {
       AESkey: 'jksflgdjldk',
       messages: [
         {
-          id: 1,
           text: 'Hello',
           senderId: '32HU3',
           time: '10:00',
         },
         {
-          id: 2,
           text: 'Hi',
           senderId: '8733J',
           time: '10:01',
         },
         {
-          id: 3,
           text: 'How are you?',
           senderId: '8733J',
           time: '10:02',
         },
         {
-          id: 4,
           text: 'I am fine',
           senderId: '32HU3',
           time: '10:03',
         },
         {
-          id: 5,
           text: 'How about you?',
           senderId: '32HU3',
           time: '10:04',
         },
         {
-          id: 6,
           text: 'I am fine too',
           senderId: '8733J',
           time: '10:05',
@@ -51,37 +45,31 @@ const data = {
       AESkey: 'ezjlkrjzk',
       messages: [
         {
-          id: 1,
           text: 'Hello',
           senderId: '32HU3',
           time: '10:00',
         },
         {
-          id: 2,
           text: 'Hi',
           senderId: '8733J',
           time: '10:01',
         },
         {
-          id: 3,
           text: 'How are you?',
           senderId: '8733J',
           time: '10:02',
         },
         {
-          id: 4,
           text: 'I am fine',
           senderId: '32HU3',
           time: '10:03',
         },
         {
-          id: 5,
           text: 'How about you?',
           senderId: '32HU3',
           time: '10:04',
         },
         {
-          id: 6,
           text: 'I am fine too',
           senderId: '8733J',
           time: '10:05',
@@ -89,6 +77,9 @@ const data = {
       ],
     },
   ],
+  settings: {
+    theme: 'dark',
+  },
 };
 
 export default data;

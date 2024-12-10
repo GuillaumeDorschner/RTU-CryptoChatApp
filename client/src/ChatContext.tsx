@@ -15,7 +15,7 @@ type Chat = {
 type User = {
   name: string;
   id: string;
-  openChat: number | null;
+  openChatId: number | null;
 };
 
 type Settings = {
