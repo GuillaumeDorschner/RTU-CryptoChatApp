@@ -1,6 +1,6 @@
 import './App.css';
-import { useState, useEffect } from 'react';
-import { useWebSocket } from './hooks/useWebSocket';
+import { useState, useEffect, useRef } from 'react';
+// import { useWebSocket } from './hooks/useWebSocket';
 
 import Sidebar from './components/Sidebar';
 import ChatHeader from './components/ChatHeader';
@@ -11,35 +11,51 @@ import ChatSettingsDrawer from './components/ChatSettingsDrawer';
 function App() {
   const [showSetting, setShowSetting] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
+  const [connected, setConnected] = useState(false);
+  const socketRef = useRef<WebSocket | null>(null);
 
-  const handleWebSocketMessage = (event: MessageEvent) => {
-    const message = JSON.parse(event.data);
-
-    switch (message.type) {
-      case 'userId':
-        setUserId(message.userId);
-        console.log('User ID received:', message.userId);
-        break;
-      case 'publicKey':
-        console.log('Public key received:', message);
-        break;
-      // case 'encryptedMessage':
-      //   setMessages((prev) => [...prev, message]);
-      //   break;
-      default:
-        console.warn('Unknown message type:', message.type);
-    }
+  const enterUserName = () => {
+    document.cookie = 'userId=123';
+    setUserId('123');
   };
 
-  const ws = useWebSocket('ws://localhost:3001', handleWebSocketMessage);
-
-  const sendMessage = (data: object) => {
-    if (ws && ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify(data));
+  const sendMessage = () => {
+    if (socketRef.current && connected) {
+      socketRef.current.send(JSON.stringify({ type: 'message', content: message }));
+      console.log('Message sent:', message);
+      setMessage(''); // Clear the input after sending
     } else {
-      console.warn('WebSocket is not connected.');
+      console.error('WebSocket is not connected.');
     }
   };
+
+  useEffect(() => {
+    const socket = new WebSocket('ws://localhost:3001');
+    socketRef.current = socket;
+
+    socket.onopen = () => {
+      console.log('WebSocket connection established.');
+      setConnected(true);
+      socket.send(JSON.stringify({ type: 'generateUserId' }));
+    };
+
+    socket.onmessage = (event) => {
+      console.log('Received message:', event.data);
+    };
+
+    socket.onclose = () => {
+      console.log('WebSocket connection closed.');
+      setConnected(false);
+    };
+
+    socket.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+
+    return () => {
+      socket.close();
+    };
+  }, []);
 
   useEffect(() => {
     const cookieId = document.cookie.split('; ').find((row) => row.startsWith('userId='));
@@ -48,16 +64,23 @@ function App() {
     } else {
       setUserId(null);
     }
-  });
+  }, []);
 
   return (
-    <div className="h-screen w-full flex overflow-hidden bg-bgGlobal p-4 text-text">
+    <>
       {!userId ? (
-        <>
-          <input type="Username" />
-        </>
+        <div className="h-screen w-full flex overflow-hidden bg-bgGlobal p-4 text-text justify-center items-center">
+          <div className="p-4 rounded-lg bg-bgCard h-max ">
+            <p>Username</p>
+            <input
+              type="text"
+              className="flex-grow p-2 border-2 border-bgGlobal rounded-lg outline-text bg-bgCard focus:ring focus:ring-blue-300"
+            />
+            <button className="p-2 mt-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600" onClick={enterUserName} />
+          </div>
+        </div>
       ) : (
-        <>
+        <div className="h-screen w-full flex overflow-hidden bg-bgGlobal p-4 text-text">
           <div className="flex-shrink-0 w-1/5">
             <Sidebar />
           </div>
@@ -75,9 +98,9 @@ function App() {
               <ChatSettingsDrawer />
             </div>
           )}
-        </>
+        </div>
       )}
-    </div>
+    </>
   );
 }
 
