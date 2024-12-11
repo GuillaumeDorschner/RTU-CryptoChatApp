@@ -20,11 +20,14 @@ function App() {
         .split('; ')
         .find((row) => row.startsWith('userId='))
         ?.split('=')[1];
-      const storedUser = localStorage.getItem('user');
+      const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
       const storedChats = localStorage.getItem('chats');
       const storedSettings = JSON.parse(localStorage.getItem('settings') || '{}');
 
-      const user = storedUserId && storedUser ? { id: storedUserId, name: storedUser, openChatId: null } : null;
+      const user =
+        storedUserId && storedUser
+          ? { id: storedUserId, name: storedUser.name, openChatId: parseFloat(storedUser.openChatId) }
+          : null;
       const chats = storedChats ? JSON.parse(storedChats) : [];
       const settings = {
         theme: storedSettings.theme || 'light',
@@ -35,33 +38,12 @@ function App() {
       setChats(chats);
       setSettings(settings);
 
-      console.log('Initialized Data:', { user, chats, settings });
       setIsLoading(false);
+      console.log({ user, chats, settings });
     };
 
     initializeData();
   }, [setUser, setChats, setSettings]);
-
-  //   console.log('user 1', user);
-  //   console.log('chats 1', chats);
-  //   console.log('settings 1', settings);
-  //   initializeUser();
-  //   console.log('user 2', user);
-  //   console.log('chats 2', chats);
-  //   console.log('settings 2', settings);
-  //   initializeChats();
-  //   console.log('user 3', user);
-  //   console.log('chats 3', chats);
-  //   console.log('settings 3', settings);
-  //   initializeSettings();
-  //   console.log('user 4', user);
-  //   console.log('chats 4', chats);
-  //   console.log('settings 4', settings);
-  //   setIsLoading(false);
-  //   console.log('user 5', user);
-  //   console.log('chats 5', chats);
-  //   console.log('settings 5', settings);
-  // }, [setUser, setChats, setSettings]);
 
   useEffect(() => {
     if (user) {
