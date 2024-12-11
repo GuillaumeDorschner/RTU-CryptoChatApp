@@ -10,6 +10,7 @@ type Chat = {
   id: number;
   AESkey: string;
   messages: Message[];
+  name: string;
 };
 
 type User = {

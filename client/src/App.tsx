@@ -8,12 +8,12 @@ import ChatMessages from './components/ChatMessages';
 import ChatInput from './components/ChatInput';
 import ChatSettingsDrawer from './components/ChatSettingsDrawer';
 
-import { useChatContext } from './ChatContext';
+import { useChatContext } from './context/ChatContext';
 
 function App() {
   const { user, setUser, chats, setChats, settings, setSettings } = useChatContext();
   const [usernameInput, setUsernameInput] = useState('');
-  const socketRef = useRef<WebSocket | null>(null);
+  // const socketRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
     const initializeUser = () => {
@@ -38,15 +38,18 @@ function App() {
 
     const initializeSettings = () => {
       const storedTheme = localStorage.getItem('theme');
+      const storedOpen = localStorage.getItem('open');
       if (storedTheme) {
-        setSettings({ ...settings, theme: storedTheme });
+        setSettings({ theme: storedTheme, open: storedOpen === 'true' });
+      } else {
+        setSettings({ theme: 'light', open: false });
       }
     };
 
     initializeUser();
     initializeChats();
     initializeSettings();
-  }, [setUser, setChats, setSettings, settings]);
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('chats', JSON.stringify(chats));
@@ -65,6 +68,8 @@ function App() {
       setUsernameInput('');
     }
   };
+
+  console.log(chats);
 
   return (
     <>
