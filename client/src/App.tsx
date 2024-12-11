@@ -1,6 +1,5 @@
 import './App.css';
-import { useState, useEffect, useRef } from 'react';
-// import { useWebSocket } from './hooks/useWebSocket';
+import { useState, useEffect } from 'react';
 
 import Sidebar from './components/Sidebar';
 import ChatHeader from './components/ChatHeader';
@@ -13,7 +12,8 @@ import { useChatContext } from './context/ChatContext';
 function App() {
   const { user, setUser, chats, setChats, settings, setSettings } = useChatContext();
   const [usernameInput, setUsernameInput] = useState('');
-  // const socketRef = useRef<WebSocket | null>(null);
+
+  console.log(user, chats, settings);
 
   useEffect(() => {
     const initializeUser = () => {
@@ -23,40 +23,41 @@ function App() {
         ?.split('=')[1];
       const storedName = localStorage.getItem('username');
       if (storedUserId && storedName) {
-        setUser({ id: storedUserId, name: storedName, openChatId: null });
+        setUser((prevUser) => prevUser || { id: storedUserId, name: storedName, openChatId: null });
       }
     };
 
     const initializeChats = () => {
       const storedChats = localStorage.getItem('chats');
       if (storedChats) {
-        setChats(JSON.parse(storedChats));
-      } else {
-        setChats([]);
+        setChats((prevChats) => (prevChats.length ? prevChats : JSON.parse(storedChats)));
       }
     };
 
     const initializeSettings = () => {
       const storedTheme = localStorage.getItem('theme');
       const storedOpen = localStorage.getItem('open');
-      if (storedTheme) {
-        setSettings({ theme: storedTheme, open: storedOpen === 'true' });
-      } else {
-        setSettings({ theme: 'light', open: false });
-      }
+      setSettings((prevSettings) => ({
+        theme: storedTheme || prevSettings.theme || 'light',
+        open: storedOpen === 'true' || prevSettings.open || false,
+      }));
     };
 
     initializeUser();
     initializeChats();
     initializeSettings();
-  }, []);
+  }, [setUser, setChats, setSettings]);
 
   useEffect(() => {
-    localStorage.setItem('chats', JSON.stringify(chats));
+    if (chats.length) {
+      localStorage.setItem('chats', JSON.stringify(chats));
+    }
   }, [chats]);
 
   useEffect(() => {
-    localStorage.setItem('theme', settings.theme);
+    if (settings.theme) {
+      localStorage.setItem('theme', settings.theme);
+    }
   }, [settings.theme]);
 
   const handleUsernameSubmit = () => {
@@ -69,13 +70,11 @@ function App() {
     }
   };
 
-  console.log(chats);
-
   return (
     <>
       {!user?.id ? (
         <div className="h-screen w-full flex overflow-hidden bg-bgGlobal p-4 text-text justify-center items-center">
-          <div className="p-4 rounded-lg bg-bgCard h-max ">
+          <div className="p-4 rounded-lg bg-bgCard h-max">
             <p>Username</p>
             <input
               type="text"
@@ -97,7 +96,6 @@ function App() {
           <div className="flex-shrink-0 w-1/5">
             <Sidebar />
           </div>
-
           <div className="flex flex-col mx-6 flex-grow p-4 rounded-lg bg-bgCard">
             <ChatHeader />
             <div className="flex-grow overflow-y-auto">
@@ -105,7 +103,6 @@ function App() {
             </div>
             <ChatInput />
           </div>
-
           {settings.open && (
             <div className="flex-shrink-0 w-1/4 p-4 rounded-lg bg-bgCard">
               <ChatSettingsDrawer />

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useMemo } from 'react';
 
 type Message = {
   text: string;
@@ -40,11 +40,12 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
   const [chats, setChats] = useState<Chat[]>([]);
   const [settings, setSettings] = useState<Settings>({ theme: 'light', open: false });
 
-  return (
-    <ChatContext.Provider value={{ user, setUser, chats, setChats, settings, setSettings }}>
-      {children}
-    </ChatContext.Provider>
+  const contextValue = useMemo(
+    () => ({ user, setUser, chats, setChats, settings, setSettings }),
+    [user, chats, settings],
   );
+
+  return <ChatContext.Provider value={contextValue}>{children}</ChatContext.Provider>;
 };
 
 export const useChatContext = () => {

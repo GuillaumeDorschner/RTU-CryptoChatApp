@@ -1,39 +1,9 @@
 import NewChat from './NewChat';
 import Chat from './Chat';
-
-interface Message {
-  user: number;
-  message: string;
-}
-
-interface ChatData {
-  id: number;
-  name: string;
-  messages: Message[];
-}
+import { useChatContext } from '../context/ChatContext';
 
 const Sidebar = () => {
-  const chats: ChatData[] = [
-    {
-      id: 1,
-      name: 'Guillaume',
-      messages: [
-        { user: 1, message: 'Hello Guillaume!' },
-        { user: 0, message: 'Hi there, how are you?' },
-        { user: 0, message: 'Are you available for a call?' },
-        { user: 1, message: 'Sure, let’s do it!' },
-        { user: 0, message: 'Great, sending you the link.' },
-      ],
-    },
-    {
-      id: 2,
-      name: 'John',
-      messages: [
-        { user: 1, message: 'Hey John!' },
-        { user: 0, message: 'What’s up?' },
-      ],
-    },
-  ];
+  const { chats } = useChatContext();
 
   return (
     <div className=" h-full flex flex-col">
@@ -44,7 +14,7 @@ const Sidebar = () => {
             key={chat.id}
             id={chat.id}
             name={chat.name}
-            lastMessage={chat.messages[chat.messages.length - 1].message}
+            lastMessage={chat.messages[chat.messages.length - 1].text}
           />
         ))}
       </div>

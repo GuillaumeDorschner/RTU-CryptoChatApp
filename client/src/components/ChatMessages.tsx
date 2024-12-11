@@ -1,14 +1,15 @@
 import { useEffect, useRef } from 'react';
 import Messages from './Messages';
-import { useChatContext } from '../ChatContext';
+import { useChatContext } from '../context/ChatContext';
 
 const Chat = () => {
   const chatEndRef = useRef<HTMLDivElement>(null);
 
-  const { chats } = useChatContext();
+  const { user, chats } = useChatContext();
 
-  console.log(chats);
+  if (!user) return null;
 
+  const other = chats.find((chat) => chat.id === user.openChatId);
   // const chat: Chat = {
   //   name: 'Guillaume',
   //   messages: [
@@ -56,13 +57,13 @@ const Chat = () => {
 
   return (
     <div className="p-4 bg-bgCard rounded-lg h-full flex flex-col">
-      {/* <h3 className="text-lg font-bold">{chat.name}</h3>
+      <h3 className="text-lg font-bold">{other?.name}</h3>
       <div className="flex-grow overflow-y-auto mt-2 space-y-2">
-        {chat.messages.map((msg, index) => (
-          <Messages key={index} name={msg.user === 1 ? chat.name : ''} message={msg.message} />
+        {other?.messages.map((msg, index) => (
+          <Messages key={index} name={msg.senderId == user.id} message={msg.text} />
         ))}
         <div ref={chatEndRef}></div>
-      </div> */}
+      </div>
     </div>
   );
 };

@@ -1,3 +1,5 @@
+import { useChatContext } from '../context/ChatContext';
+
 interface ChatProps {
   id: number;
   name: string;
@@ -5,8 +7,12 @@ interface ChatProps {
 }
 
 const ChatList = ({ id, name, lastMessage }: ChatProps) => {
+  const { setUser } = useChatContext();
+
   const handleChatClick = () => {
     console.log(`Chat number ${id} clicked!`);
+
+    setUser((prevUser) => ({ ...prevUser, openChatId: id }));
   };
 
   return (
