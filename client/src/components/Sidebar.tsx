@@ -3,7 +3,7 @@ import Chat from './Chat';
 import { useChatContext } from '../context/ChatContext';
 
 const Sidebar = () => {
-  const { chats } = useChatContext();
+  const { user, chats } = useChatContext();
 
   return (
     <div className=" h-full flex flex-col">
@@ -14,6 +14,7 @@ const Sidebar = () => {
             key={chat.id}
             id={chat.id}
             name={chat.name}
+            focus={chat.id === user?.openChatId}
             lastMessage={chat.messages[chat.messages.length - 1].text}
           />
         ))}

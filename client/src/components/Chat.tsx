@@ -4,9 +4,10 @@ interface ChatProps {
   id: number;
   name: string;
   lastMessage: string;
+  focus: boolean;
 }
 
-const ChatList = ({ id, name, lastMessage }: ChatProps) => {
+const ChatList = ({ id, name, lastMessage, focus }: ChatProps) => {
   const { setUser } = useChatContext();
 
   const handleChatClick = () => {
@@ -17,11 +18,13 @@ const ChatList = ({ id, name, lastMessage }: ChatProps) => {
 
   return (
     <div
-      className="max-w-full p-4 mb-4 rounded-lg bg-bgCard cursor-pointer hover:shadow-md transition-shadow"
+      className={`max-w-full p-4 mb-4 rounded-lg cursor-pointer transition-shadow hover:shadow-md ${
+        focus ? 'bg-focus' : 'bg-bgCard'
+      }`}
       onClick={handleChatClick}
     >
-      <p className="text-lg font-semibold text-textPrimary">{name}</p>
-      <p className="text-sm text-textSecondary truncate">{lastMessage}</p>
+      <p className={`text-lg font-semibold text-textPrimary ${focus ? 'text-textInverse' : 'text-text'}`}>{name}</p>
+      <p className={`text-sm text-textSecondary truncate ${focus ? 'text-textInverse' : 'text-text'}`}>{lastMessage}</p>
     </div>
   );
 };

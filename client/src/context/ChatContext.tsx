@@ -29,7 +29,7 @@ type ChatContextType = {
   setUser: (user: User | null) => void;
   chats: Chat[];
   setChats: (chats: Chat[]) => void;
-  settings: Settings;
+  settings: Settings | null;
   setSettings: (settings: Settings) => void;
 };
 
@@ -38,7 +38,7 @@ const ChatContext = createContext<ChatContextType | undefined>(undefined);
 export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [chats, setChats] = useState<Chat[]>([]);
-  const [settings, setSettings] = useState<Settings>({ theme: 'light', open: false });
+  const [settings, setSettings] = useState<Settings | null>(null);
 
   const contextValue = useMemo(
     () => ({ user, setUser, chats, setChats, settings, setSettings }),

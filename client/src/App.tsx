@@ -12,41 +12,62 @@ import { useChatContext } from './context/ChatContext';
 function App() {
   const { user, setUser, chats, setChats, settings, setSettings } = useChatContext();
   const [usernameInput, setUsernameInput] = useState('');
-
-  console.log(user, chats, settings);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const initializeUser = () => {
+    const initializeData = async () => {
       const storedUserId = document.cookie
         .split('; ')
         .find((row) => row.startsWith('userId='))
         ?.split('=')[1];
-      const storedName = localStorage.getItem('username');
-      if (storedUserId && storedName) {
-        setUser((prevUser) => prevUser || { id: storedUserId, name: storedName, openChatId: null });
-      }
-    };
-
-    const initializeChats = () => {
+      const storedUser = localStorage.getItem('user');
       const storedChats = localStorage.getItem('chats');
-      if (storedChats) {
-        setChats((prevChats) => (prevChats.length ? prevChats : JSON.parse(storedChats)));
-      }
+      const storedSettings = JSON.parse(localStorage.getItem('settings') || '{}');
+
+      const user = storedUserId && storedUser ? { id: storedUserId, name: storedUser, openChatId: null } : null;
+      const chats = storedChats ? JSON.parse(storedChats) : [];
+      const settings = {
+        theme: storedSettings.theme || 'light',
+        open: storedSettings.open === 'true' || false,
+      };
+
+      setUser(user);
+      setChats(chats);
+      setSettings(settings);
+
+      console.log('Initialized Data:', { user, chats, settings });
+      setIsLoading(false);
     };
 
-    const initializeSettings = () => {
-      const storedTheme = localStorage.getItem('theme');
-      const storedOpen = localStorage.getItem('open');
-      setSettings((prevSettings) => ({
-        theme: storedTheme || prevSettings.theme || 'light',
-        open: storedOpen === 'true' || prevSettings.open || false,
-      }));
-    };
-
-    initializeUser();
-    initializeChats();
-    initializeSettings();
+    initializeData();
   }, [setUser, setChats, setSettings]);
+
+  //   console.log('user 1', user);
+  //   console.log('chats 1', chats);
+  //   console.log('settings 1', settings);
+  //   initializeUser();
+  //   console.log('user 2', user);
+  //   console.log('chats 2', chats);
+  //   console.log('settings 2', settings);
+  //   initializeChats();
+  //   console.log('user 3', user);
+  //   console.log('chats 3', chats);
+  //   console.log('settings 3', settings);
+  //   initializeSettings();
+  //   console.log('user 4', user);
+  //   console.log('chats 4', chats);
+  //   console.log('settings 4', settings);
+  //   setIsLoading(false);
+  //   console.log('user 5', user);
+  //   console.log('chats 5', chats);
+  //   console.log('settings 5', settings);
+  // }, [setUser, setChats, setSettings]);
+
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
+    }
+  }, [user]);
 
   useEffect(() => {
     if (chats.length) {
@@ -55,20 +76,27 @@ function App() {
   }, [chats]);
 
   useEffect(() => {
-    if (settings.theme) {
-      localStorage.setItem('theme', settings.theme);
+    if (settings) {
+      localStorage.setItem('settings', JSON.stringify(settings));
     }
-  }, [settings.theme]);
+  }, [settings]);
 
   const handleUsernameSubmit = () => {
     if (usernameInput.trim()) {
       const newUserId = `user-${Math.random().toString(36).substr(2, 9)}`;
       document.cookie = `userId=${newUserId}; path=/`;
       setUser({ id: newUserId, name: usernameInput.trim(), openChatId: null });
-      localStorage.setItem('username', usernameInput.trim());
       setUsernameInput('');
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="h-screen w-full flex justify-center items-center bg-bgGlobal text-text">
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -82,9 +110,12 @@ function App() {
               onChange={(e) => setUsernameInput(e.target.value)}
               className="flex-grow p-2 border-2 border-bgGlobal rounded-lg outline-text bg-bgCard focus:ring focus:ring-blue-300"
               placeholder="Enter your username"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleUsernameSubmit();
+              }}
             />
             <button
-              className="p-2 mt-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+              className="p-2 mt-4 ml-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
               onClick={handleUsernameSubmit}
             >
               Submit
@@ -103,7 +134,7 @@ function App() {
             </div>
             <ChatInput />
           </div>
-          {settings.open && (
+          {settings?.open && (
             <div className="flex-shrink-0 w-1/4 p-4 rounded-lg bg-bgCard">
               <ChatSettingsDrawer />
             </div>

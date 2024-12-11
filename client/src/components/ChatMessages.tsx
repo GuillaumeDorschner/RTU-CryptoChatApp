@@ -10,58 +10,29 @@ const Chat = () => {
   if (!user) return null;
 
   const other = chats.find((chat) => chat.id === user.openChatId);
-  // const chat: Chat = {
-  //   name: 'Guillaume',
-  //   messages: [
-  //     { user: 1, message: 'Hello Guillaume!' },
-  //     { user: 0, message: 'Hi there, how are you?' },
-  //     { user: 0, message: 'Are you available for a call?' },
-  //     { user: 1, message: 'Sure, let’s do it!' },
-  //     { user: 1, message: 'Sure, let’s do it!' },
-  //     { user: 1, message: 'Sure, let’s do it!' },
-  //     { user: 1, message: 'Sure, let’s do it!' },
-  //     { user: 1, message: 'Sure, let’s do it!' },
-  //     { user: 1, message: 'Sure, let’s do it!' },
-  //     { user: 1, message: 'Sure, let’s do it!' },
-  //     { user: 1, message: 'Sure, let’s do it!' },
-  //     { user: 1, message: 'Sure, let’s do it!' },
-  //     { user: 1, message: 'Sure, let’s do it!' },
-  //     { user: 1, message: 'Sure, let’s do it!' },
-  //     { user: 1, message: 'Sure, let’s do it!' },
-  //     { user: 1, message: 'Sure, let’s do it!' },
-  //     { user: 1, message: 'Sure, let’s do it!' },
-  //     { user: 1, message: 'Sure, let’s do it!' },
-  //     { user: 1, message: 'Sure, let’s do it!' },
-  //     { user: 1, message: 'Sure, let’s do it!' },
-  //     { user: 1, message: 'Sure, let’s do it!' },
-  //     { user: 1, message: 'Sure, let’s do it!' },
-  //     { user: 1, message: 'Sure, let’s do it!' },
-  //     { user: 1, message: 'Sure, let’s do it!' },
-  //     { user: 1, message: 'Sure, let’s do it!' },
-  //     { user: 1, message: 'Sure, let’s do it!' },
-  //     { user: 1, message: 'Sure, let’s do it!' },
-  //     { user: 1, message: 'Sure, let’s do it!' },
-  //     { user: 1, message: 'Sure, let’s do it!' },
-  //     { user: 1, message: 'Sure, let’s do it!' },
-  //     { user: 1, message: 'Sure, let’s do it!' },
-  //     { user: 1, message: 'Sure, let’s do it!' },
-  //     { user: 0, message: 'Great, sending you the link.' },
-  //   ],
-  // };
 
-  // useEffect(() => {
-  //   if (chatEndRef.current) {
-  //     chatEndRef.current.scrollIntoView({ behavior: 'instant' });
-  //   }
-  // }, [chat.messages]);
+  useEffect(() => {
+    if (chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [chats]);
 
   return (
     <div className="p-4 bg-bgCard rounded-lg h-full flex flex-col">
-      <h3 className="text-lg font-bold">{other?.name}</h3>
       <div className="flex-grow overflow-y-auto mt-2 space-y-2">
-        {other?.messages.map((msg, index) => (
-          <Messages key={index} name={msg.senderId == user.id} message={msg.text} />
-        ))}
+        {other?.messages.map((msg, index) => {
+          const isCurrentUser = msg.senderId === user.id;
+          const showName = index === 0 || other.messages[index - 1].senderId !== msg.senderId;
+
+          return (
+            <Messages
+              key={index}
+              name={showName ? (isCurrentUser ? 'You' : other?.name) : ''}
+              message={msg.text}
+              isCurrentUser={isCurrentUser}
+            />
+          );
+        })}
         <div ref={chatEndRef}></div>
       </div>
     </div>
