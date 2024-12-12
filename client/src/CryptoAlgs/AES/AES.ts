@@ -1,5 +1,5 @@
-
-
+import { WordArray } from "../Utils/WordArray";
+import { AESConstants, aesConstants } from "./AESConstants";
 interface AES {
     createCipherKey(): number[];
     encrypt: any;
@@ -7,17 +7,83 @@ interface AES {
 }
 class AESImpl {
 
-    S_BOX: number[] = [];
-    R_CON: number[] = [0x00, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36];
-    INV_SBOX: number[] = [];
-    SUB_MIX_0: number[] = [];
-    SUB_MIX_1: number[] = [];
-    SUB_MIX_2: number[] = [];
-    SUB_MIX_3: number[] = [];
-    INV_SUB_MIX_0: number[] = [];
-    INV_SUB_MIX_1: number[] = [];
-    INV_SUB_MIX_2: number[] = [];
-    INV_SUB_MIX_3: number[] = [];
+    _nbRounds!: number;
+    _key!: WordArray;
+    _keySchedule!: Array<number>;
+    _invKeySchedule!: Array<number>;
+
+    updateState(key: WordArray, aesConstants: AESConstants): {key: WordArray, keySchedule: number[], ikeySchedule: number[]} {
+        if (this._nbRounds && this._key === key) {
+            return {key: this._key, keySchedule: this._keySchedule, ikeySchedule: this._invKeySchedule};
+        }
+
+        // Shortcuts
+        this._key = key;
+        const keyWords = key.words
+        const keySize = key.nbBytes/4
+        const nbRounds = keySize+6
+        const ksRows = (nbRounds+1)*4
+        const keySchedule = this._keySchedule = this.computeKeySchedule(keyWords, keySize, ksRows, aesConstants)
+        const invKeySchedule = this._invKeySchedule = this.computeInvKeySchedule(keyWords, keySize, ksRows, keySchedule, aesConstants) 
+        
+        return {key: key, keySchedule: keySchedule, ikeySchedule: invKeySchedule};
+    }
+
+
+    computeKeySchedule(keyWords: number[], keySize: number, ksRows: number, aesConstants: AESConstants) {
+        
+        // Compute key schedule
+        const keySchedulePart1 = [...Array(keySize).keys()].map(ksRow=>keyWords[ksRow])
+
+        const keySchedulePart2 = [...Array(ksRows).slice(keySize).keys()].map(ksRow=> {
+            const word = keySchedulePart1[ksRow - 1];
+
+            const finalWord: number = (()=> {if (!(ksRow % keySize)) {
+                // Rot word
+                const rotatedWord = (word << 8) | (word >>> 24);
+
+                // Sub word
+                const subbedWord = ((aesConstants.sbox[rotatedWord >>> 24] << 24) | 
+                    (aesConstants.sbox[(rotatedWord >>> 16) & 0xff] << 16) | 
+                    (aesConstants.sbox[(rotatedWord >>> 8) & 0xff] << 8) | 
+                    aesConstants.sbox[rotatedWord & 0xff]);
+
+                // Mix Rcon
+                return subbedWord ^ aesConstants.rcon[(ksRow / keySize) | 0] << 24;
+            
+            } else if (keySize > 6 && ksRow % keySize === 4) {
+                // Sub word
+                return ((aesConstants.sbox[word >>> 24] << 24) | 
+                (aesConstants.sbox[(word >>> 16) & 0xff] << 16) | 
+                (aesConstants.sbox[(word >>> 8) & 0xff] << 8) | 
+                aesConstants.sbox[word & 0xff]);
+            } else return word })()
+
+            return keySchedulePart1[ksRow - keySize] ^ finalWord;
+        })
+
+        return [...keySchedulePart1, ...keySchedulePart2]
+
+    }
+
+    computeInvKeySchedule(keyWords: number[], keySize: number, ksRows: number, keySchedule: number[] , aesConstants: AESConstants): number[] {
+        
+        return [...Array(ksRows).keys()].map(invKsRow=>{
+            const ksRow = ksRows - invKsRow;
+            const word = invKsRow%4 ? keySchedule[ksRow] : keySchedule[ksRow-4]
+            
+            if (invKsRow < 4 || ksRow <= 4) {
+                return word;
+            } else {
+                return (aesConstants.invSubMix0[aesConstants.sbox[word >>> 24]] ^
+                    aesConstants.invSubMix1[aesConstants.sbox[(word >>> 16) & 0xff]] ^
+                    aesConstants.invSubMix2[aesConstants.sbox[(word >>> 8) & 0xff]] ^ 
+                    aesConstants.invSubMix3[aesConstants.sbox[word & 0xff]])
+            }
+        })
+        
+    }
+
 
     subShift(word: number, subMixArray: number[], shiftAmmount: 24|16|8|0): number {
         if(shiftAmmount==16||shiftAmmount==8||shiftAmmount==0){
@@ -85,7 +151,7 @@ class AESImpl {
 
         const blockWithRKey: number[] = this.xorBlock(block, keySchedule)
         const ksRow: number = 4
-        const intermediateBlock: number[] = this.doRounds(blockWithRKey, subMixArrays,keySchedule, ksRow, nbRounds)
+        const intermediateBlock: number[] = this.doRounds(blockWithRKey, subMixArrays,keySchedule, ksRow, this._nbRounds)
 
         return this.doFinalRound(intermediateBlock, sbox, keySchedule, ksRow)
     }
@@ -96,16 +162,16 @@ class AESImpl {
 
     encryptBlock(block: number[], prevBlockOrIv: number[]): number[] {
         const xoredBlock = this.xorBlock(block, prevBlockOrIv)
-        const cypherText = this.cryptBlock(xoredBlock, keySchedule, subMixArrays, sbox)
+        const cypherText = this.cryptBlock(xoredBlock, this._keySchedule, [aesConstants.subMix0, aesConstants.subMix1, aesConstants.subMix2, aesConstants.subMix3], aesConstants.sbox)
         return cypherText   
     }
     
-    decryptBlock(block: number[], prevBlockOrIv: number[]): number[] {
+    decryptBlock(block: number[], prevBlockOrIv: number[], aesConstants: AESConstants): number[] {
 
 
         const newBlock = [block[0], block[3], block[2], block[1]]
 
-        const plainText = this.cryptBlock(newBlock, keySchedule, subMixArrays, sbox)
+        const plainText = this.cryptBlock(newBlock, this._keySchedule, [aesConstants.subMix0, aesConstants.subMix1, aesConstants.subMix2, aesConstants.subMix3], aesConstants.sbox)
 
         const swappedAgain = [plainText[0], plainText[3], plainText[2], plainText[1]]
 
@@ -113,10 +179,11 @@ class AESImpl {
 
         return xoredBlock
     }
+}
 
-}
-export function createAESImpl(): AES {
-    {
-        
-    }
-}
+
+//export function createAESImpl(): AES {
+//    {
+//        
+//    }
+//}
