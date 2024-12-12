@@ -3,12 +3,13 @@ import type { WebSocket } from 'ws';
 import { v4 as uuidv4 } from 'uuid';
 
 type Message =
-  | { type: 'generateUserId'; name: string }
+  | { type: 'generateUserId' }
+  | { type: 'storeWebSocket'; userId: string }
   | { type: 'relayPublicKey'; senderId: string; recipientId: string; publicKey: string }
   | { type: 'relayEncryptedMessage'; senderId: string; recipientId: string; encryptedMessage: string };
 
 type Response =
-  | { type: 'userId'; userId: string }
+  | { type: 'generatedUserId'; userId: string }
   | { type: 'publicKey'; senderId: string; publicKey: string }
   | { type: 'encryptedMessage'; senderId: string; encryptedMessage: string };
 
@@ -32,38 +33,40 @@ export const startWebSocketServer = (port: number) => {
     console.log('User connected');
 
     ws.on('message', (data) => {
-      // try {
-      const message: string = JSON.parse(data.toString());
+      try {
+        const message: Message = JSON.parse(data.toString());
 
-      console.log('Received message:', message);
-      // const message: Message = JSON.parse(data);
+        switch (message.type) {
+          case 'generateUserId':
+            userId = uuidv4();
+            clients.set(userId, ws);
+            console.log(`User connected: ${userId}`);
+            break;
 
-      //   switch (message.type) {
-      //     case 'generateUserId':
-      //       userId = uuidv4();
-      //       clients.set(userId, ws);
-      //       ws.send(JSON.stringify({ type: 'userId', userId }));
-      //       console.log(`User connected: ${userId}`);
-      //       break;
+          case 'storeWebSocket':
+            userId = message.userId;
+            clients.set(userId, ws);
+            console.log(`Stored WebSocket for user: ${userId}`);
+            break;
 
-      //     case 'relayPublicKey':
-      //       const { senderId, recipientId, publicKey } = message;
-      //       console.log(`Relaying public key from ${senderId} to ${recipientId}`);
-      //       sendToClient(recipientId, { type: 'publicKey', senderId, publicKey });
-      //       break;
+          case 'relayPublicKey':
+            const { senderId, recipientId, publicKey } = message;
+            console.log(`Relaying public key from ${senderId} to ${recipientId}`);
+            sendToClient(recipientId, { type: 'publicKey', senderId, publicKey });
+            break;
 
-      //     case 'relayEncryptedMessage':
-      //       const { senderId: msgSenderId, recipientId: msgRecipientId, encryptedMessage } = message;
-      //       console.log(`Relaying message from ${msgSenderId} to ${msgRecipientId}`);
-      //       sendToClient(msgRecipientId, { type: 'encryptedMessage', senderId: msgSenderId, encryptedMessage });
-      //       break;
+          case 'relayEncryptedMessage':
+            const { senderId: msgSenderId, recipientId: msgRecipientId, encryptedMessage } = message;
+            console.log(`Relaying message from ${msgSenderId} to ${msgRecipientId}`);
+            sendToClient(msgRecipientId, { type: 'encryptedMessage', senderId: msgSenderId, encryptedMessage });
+            break;
 
-      //     default:
-      //       console.log('Unknown message type');
-      //   }
-      // } catch (error) {
-      //   console.error('Error processing message:', error);
-      // }
+          default:
+            console.log('Unknown message type');
+        }
+      } catch (error) {
+        console.error('Error processing message:', error);
+      }
     });
 
     ws.on('close', () => {

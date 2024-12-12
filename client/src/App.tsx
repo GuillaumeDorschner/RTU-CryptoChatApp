@@ -24,6 +24,14 @@ function App() {
       const storedChats = localStorage.getItem('chats');
       const storedSettings = JSON.parse(localStorage.getItem('settings') || '{}');
 
+      if (storedUserId) {
+        ws?.send(
+          JSON.stringify({
+            type: 'storeWebSocket',
+            userId: storedUserId,
+          }),
+        );
+      }
       const user =
         storedUserId && storedUser
           ? { id: storedUserId, name: storedUser.name, openChatId: parseFloat(storedUser.openChatId) }
@@ -62,20 +70,39 @@ function App() {
     }
   }, [settings]);
 
-  const handleUsernameSubmit = () => {
+  const handleUsernameSubmit = async () => {
     if (usernameInput.trim()) {
-      // TODO send request to server to create new user
-      ws?.send(
-        JSON.stringify({
-          type: 'generateUserId',
-          name: usernameInput.trim(),
-        }),
-      );
+      try {
+        const response = await fetch('http://localhost:3000/api/generateUserId', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name: usernameInput.trim() }),
+        });
 
-      const newUserId = `user-${Math.random().toString(36).substr(2, 9)}`;
-      document.cookie = `userId=${newUserId}; path=/`;
-      setUser({ id: newUserId, name: usernameInput.trim(), openChatId: null });
-      setUsernameInput('');
+        if (!response.ok) {
+          throw new Error(`Server responded with status ${response.status}`);
+        }
+
+        const { userId } = await response.json();
+
+        document.cookie = `userId=${userId}`;
+
+        ws?.send(
+          JSON.stringify({
+            type: 'storeWebSocket',
+            userId,
+          }),
+        );
+
+        setUser({ id: userId, name: usernameInput.trim(), openChatId: null });
+        setUsernameInput('');
+      } catch (error) {
+        console.error('Error creating user:', error.message);
+      }
+    } else {
+      console.warn('Username cannot be empty.');
     }
   };
 
