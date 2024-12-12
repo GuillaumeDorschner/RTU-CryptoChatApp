@@ -1,17 +1,47 @@
+import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPaperPlane } from '@fortawesome/free-solid-svg-icons';
+import { useChatContext } from '../context/ChatContext';
 
 const ChatInput = () => {
+  const { user, chats, setChats, ws } = useChatContext();
+  const [messageInput, setMessageInput] = useState('');
+
   const handleSendMessage = () => {
-    console.log('Message: ');
+    if (messageInput.trim() && user && user.openChatId !== null) {
+      const newMessage = {
+        text: messageInput.trim(),
+        senderId: user.id,
+        time: new Date(),
+      };
+
+      // TODO: Send message to server
+      ws?.send(
+        JSON.stringify({
+          type: 'relayEncryptedMessage',
+          senderId: user.id,
+          recipientId: user.openChatId, // Replace with recipient ID
+          encryptedMessage: newMessage.text, // Encrypt before sending
+        }),
+      );
+
+      const updatedChats = chats.map((chat) =>
+        chat.id === user.openChatId ? { ...chat, messages: [...chat.messages, newMessage] } : chat,
+      );
+
+      setChats(updatedChats);
+      setMessageInput('');
+    }
   };
 
   return (
     <div className="flex items-center p-2 bg-bubbleChat rounded-lg shadow-md">
       <input
         type="text"
+        value={messageInput}
+        onChange={(e) => setMessageInput(e.target.value)}
+        className="flex-grow p-2 border-none rounded-lg outline-none bg-bubbleChat focus:ring focus:ring-blue-300"
         placeholder="Type your message..."
-        className="flex-grow p-2 border-none rounded-lg outline-none bg-bubbleChat focus:ring focus:ring-blue-300 bg-"
         onKeyDown={(e) => {
           if (e.key === 'Enter') handleSendMessage();
         }}

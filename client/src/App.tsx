@@ -31,7 +31,7 @@ function App() {
       const chats = storedChats ? JSON.parse(storedChats) : [];
       const settings = {
         theme: storedSettings.theme || 'light',
-        open: storedSettings.open === 'true' || false,
+        open: storedSettings.open || false,
       };
 
       setUser(user);
@@ -39,7 +39,6 @@ function App() {
       setSettings(settings);
 
       setIsLoading(false);
-      console.log({ user, chats, settings });
     };
 
     initializeData();
