@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useMemo, ReactNode } from 'react';
+import { createContext, useContext, useState, useMemo, ReactNode, useCallback } from 'react';
 import { useWebSocket } from '../hooks/useWebSocket';
 
 type Message = {
@@ -9,9 +9,10 @@ type Message = {
 
 type Chat = {
   id: number;
+  name: string;
+  participantId: string;
   AESkey: string;
   messages: Message[];
-  name: string;
 };
 
 type User = {
@@ -32,7 +33,7 @@ type ChatContextType = {
   setChats: (chats: Chat[]) => void;
   settings: Settings | null;
   setSettings: (settings: Settings) => void;
-  ws: WebSocket;
+  ws: WebSocket | null;
 };
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -42,34 +43,34 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
   const [chats, setChats] = useState<Chat[]>([]);
   const [settings, setSettings] = useState<Settings | null>(null);
 
-  const handleWebSocketMessage = (event: MessageEvent) => {
-    const message = JSON.parse(event.data);
+  const handleWebSocketMessage = useCallback(
+    (event: MessageEvent) => {
+      const message = JSON.parse(event.data);
 
-    if (message.type === 'relayEncryptedMessage') {
-      setChats((prevChats) =>
-        prevChats.map(
-          (chat) =>
+      if (message.type === 'relayEncryptedMessage') {
+        setChats((prevChats) =>
+          prevChats.map((chat) =>
             chat.id === message.recipientId
               ? {
                   ...chat,
                   messages: [
                     ...chat.messages,
                     {
-                      text: message.encryptedMessage, // TODO Decrypt if necessary
+                      text: message.encryptedMessage, // TODO: Decrypt message
                       senderId: message.senderId,
                       time: new Date(),
                     },
                   ],
                 }
               : chat,
-          // TODO userid
-          // TODO aeskey
-        ),
-      );
-    }
-  };
+          ),
+        );
+      }
+    },
+    [setChats],
+  );
 
-  const ws = useWebSocket('ws://localhost:PORT', handleWebSocketMessage);
+  const ws = useWebSocket('ws://localhost:3001', handleWebSocketMessage);
 
   const contextValue = useMemo(
     () => ({

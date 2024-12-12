@@ -1,29 +1,23 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 
 type WebSocketMessageHandler = (event: MessageEvent) => void;
 
-export const useWebSocket = (url: string, onMessage: WebSocketMessageHandler): WebSocket => {
-  const wsRef = useRef<WebSocket | null>(null);
+export const useWebSocket = (url: string, onMessage: WebSocketMessageHandler): WebSocket | null => {
+  const [socket, setSocket] = useState<WebSocket | null>(null);
 
   useEffect(() => {
-    console.log('WebSocket connection initialized');
     const connect = () => {
-      const socket = new WebSocket(url);
-      console.log('WebSocket connection initialized');
-      wsRef.current = socket;
+      const ws = new WebSocket(url);
 
-      socket.onmessage = onMessage;
-
-      socket.onopen = () => {
+      ws.onmessage = onMessage;
+      ws.onopen = () => {
         console.log('WebSocket connection established');
+        setSocket(ws);
       };
-
-      socket.onerror = (error) => {
-        console.error('WebSocket error:', error);
-      };
-
-      socket.onclose = () => {
+      ws.onerror = (error) => console.error('WebSocket error:', error);
+      ws.onclose = () => {
         console.log('WebSocket connection closed. Reconnecting...');
+        setSocket(null);
         setTimeout(connect, 3000);
       };
     };
@@ -31,13 +25,9 @@ export const useWebSocket = (url: string, onMessage: WebSocketMessageHandler): W
     connect();
 
     return () => {
-      wsRef.current?.close();
+      socket?.close();
     };
   }, [url, onMessage]);
 
-  if (!wsRef.current) {
-    throw new Error('WebSocket connection is not initialized');
-  }
-
-  return wsRef.current;
+  return socket;
 };

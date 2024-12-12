@@ -10,7 +10,7 @@ import ChatSettingsDrawer from './components/ChatSettingsDrawer';
 import { useChatContext } from './context/ChatContext';
 
 function App() {
-  const { user, setUser, chats, setChats, settings, setSettings } = useChatContext();
+  const { user, setUser, chats, setChats, settings, setSettings, ws } = useChatContext();
   const [usernameInput, setUsernameInput] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
@@ -64,6 +64,14 @@ function App() {
 
   const handleUsernameSubmit = () => {
     if (usernameInput.trim()) {
+      // TODO send request to server to create new user
+      ws?.send(
+        JSON.stringify({
+          type: 'generateUserId',
+          name: usernameInput.trim(),
+        }),
+      );
+
       const newUserId = `user-${Math.random().toString(36).substr(2, 9)}`;
       document.cookie = `userId=${newUserId}; path=/`;
       setUser({ id: newUserId, name: usernameInput.trim(), openChatId: null });

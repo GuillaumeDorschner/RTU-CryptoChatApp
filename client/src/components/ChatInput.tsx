@@ -15,15 +15,20 @@ const ChatInput = () => {
         time: new Date(),
       };
 
-      // TODO: Send message to server
-      ws?.send(
-        JSON.stringify({
-          type: 'relayEncryptedMessage',
-          senderId: user.id,
-          recipientId: user.openChatId, // Replace with recipient ID
-          encryptedMessage: newMessage.text, // Encrypt before sending
-        }),
-      );
+      const participantId = chats.find((chat) => chat.id === user.openChatId)?.participantId;
+
+      if (ws) {
+        ws?.send(
+          JSON.stringify({
+            type: 'relayEncryptedMessage',
+            senderId: user.id,
+            recipientId: participantId,
+            encryptedMessage: newMessage.text, // TODO: Encrypt before sending
+          }),
+        );
+      } else {
+        console.error('WebSocket connection is closed or not established.');
+      }
 
       const updatedChats = chats.map((chat) =>
         chat.id === user.openChatId ? { ...chat, messages: [...chat.messages, newMessage] } : chat,
