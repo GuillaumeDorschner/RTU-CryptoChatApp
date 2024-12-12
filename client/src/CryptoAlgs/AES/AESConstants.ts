@@ -17,7 +17,7 @@ type multiplications = {x2: number, x4: number, x8: number}
 type subMixElements = {sm0:number, sm1:number, sm2:number, sm3:number}
 type invSubMixElements = {ism0:number, ism1:number, ism2:number, ism3:number}
 
-export class AESConstantsImpl {
+class AESConstantsImpl {
 
     
 
@@ -112,3 +112,4 @@ export class AESConstantsImpl {
         return this.computeAESConstantsRecurse(doubles)
     }
 }
+export const aesConstants: AESConstants =  (new AESConstantsImpl()).computeAESConstants()
