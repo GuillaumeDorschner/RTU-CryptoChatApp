@@ -26,6 +26,17 @@ CryptoChatApp is a messaging application demonstrating cryptographic principles 
 
 ### Installation
 
+#### Using Docker
+
+```bash
+docker pull ghcr.io/guillaumedorschner/rtu-cryptochatapp:latest
+docker run -p 80:80 -p 3000:3000 -p 3001:3001 ghcr.io/guillaumedorschner/rtu-cryptochatapp:latest
+```
+
+Then open your browser and visit `http://localhost`.
+
+#### Clone the repository
+
 1. Clone the repository:
 
    ```bash
