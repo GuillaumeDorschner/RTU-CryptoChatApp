@@ -8,7 +8,6 @@ const ToggleDarkMode = () => {
   const { settings, setSettings } = useChatContext();
 
   const toggleTheme = () => {
-    console.log(settings?.theme);
     const newTheme = settings?.theme === 'dark' ? 'light' : 'dark';
     setSettings({
       ...settings,

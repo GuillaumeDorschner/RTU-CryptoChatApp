@@ -11,8 +11,6 @@ const ChatList = ({ id, name, lastMessage, focus }: ChatProps) => {
   const { setUser } = useChatContext();
 
   const handleChatClick = () => {
-    console.log(`Chat number ${id} clicked!`);
-
     setUser((prevUser) => ({ ...prevUser, openChatId: id }));
   };
 
