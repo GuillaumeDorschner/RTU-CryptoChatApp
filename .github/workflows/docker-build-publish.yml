@@ -32,6 +32,7 @@ jobs:
         run: |
           docker buildx build \
             --push \
+            --platform linux/arm/v7,linux/arm64/v8,linux/amd64 \
             --tag ghcr.io/${{ env.lowercase_owner }}/${{ env.lowercase_repo }}:latest \
             --tag ghcr.io/${{ env.lowercase_owner }}/${{ env.lowercase_repo }}:${{ github.sha }} \
             .
