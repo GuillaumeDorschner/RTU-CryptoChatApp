@@ -47,6 +47,10 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
     (event: MessageEvent) => {
       const message = JSON.parse(event.data);
 
+      if (message.type === 'generatedUserId') {
+        setUser((prevUser) => ({ ...prevUser, id: message.userId }));
+      }
+
       if (message.type === 'relayEncryptedMessage') {
         setChats((prevChats) =>
           prevChats.map((chat) =>

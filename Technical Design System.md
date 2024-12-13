@@ -40,13 +40,13 @@ sequenceDiagram
     A-->>A: Does browser have cookie ID?
     Note over A: No
     A-->>A: Enter username
-    A->>S: Send username
+    A->>S: Send request
     S-->>S: Generate user ID and store in memory
     S-->>A: Return home page with ID
     Note over A: Yes
     A-->>A: Keep session active
     A-->>A: User connected
-    A->>S: Open websocket connection
+    A->>S: Send ID + WebSocket connection
     S->>S: Store websocket connection in map
 ```
 
