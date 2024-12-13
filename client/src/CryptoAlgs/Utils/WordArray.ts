@@ -106,8 +106,64 @@ export class WordArray implements WordArray {
         return new WordArray(newWords, this.nbBytes)
     }
 
+    public static random(nBytes: number) {
+
+        const r = (function(m_w: number) {
+            let m_z = 0x3ade68b1;
+
+            const mask = 0xffffffff;
+
+            return function() {
+                m_z = (0x9069 * (m_z & 0xFFFF) + (m_z >> 0x10)) & mask;
+                m_w = (0x4650 * (m_w & 0xFFFF) + (m_w >> 0x10)) & mask;
+                let result = ((m_z << 0x10) + m_w) & mask;
+                result /= 0x100000000;
+                result += 0.5;
+                return result * (Math.random() > .5 ? 1 : -1);
+            };
+        });
+        
+        const words = [];
+        for(let i = 0, rcache; i < nBytes; i += 4) {
+            const _r = r((rcache || Math.random()) * 0x100000000);
+
+            rcache = _r() * 0x3ade67b7;
+            words.push((_r() * 0x100000000) | 0);
+        }
+
+        return new WordArray(words, nBytes);
+    }
+
+
     clone(): WordArray {
         return new WordArray(this.words.slice(0), this.nbBytes);
+    }
+
+    static latin1StringToWordArray(latin1Str: string): WordArray {
+        // Shortcut
+        const latin1StrLength = latin1Str.length;
+
+        // Convert
+        const words: Array<number> = [];
+        for (let i = 0; i < latin1StrLength; i++) {
+            words[i >>> 2] |= (latin1Str.charCodeAt(i) & 0xff) << (24 - (i % 4) * 8);
+        }
+
+        return new WordArray(words, latin1StrLength);
+    }
+
+
+
+    public static stringifyUtf8(wordArray: WordArray): string {
+        try {
+            return decodeURIComponent(escape(Latin1.stringify(wordArray)));
+        } catch(e) {
+            throw new Error('Malformed UTF-8 data');
+        }
+    }
+
+    static utf8StringToWordArray(utf8Str: string): WordArray {
+        return this.latin1StringToWordArray(unescape(encodeURIComponent(utf8Str)));
     }
     
 

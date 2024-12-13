@@ -54,7 +54,7 @@ class AESConstantsImpl {
     }
 
     private computeCounter(x: number, xi: number, mults: multiplications, doubles: number[]): {x: number, xi:number} {
-
+        /// wtf !x ???
         return !x ? {x:1,xi:1} : {x:(mults.x2 ^ doubles[doubles[doubles[mults.x8 ^ mults.x2]]]), xi: xi ^ doubles[doubles[xi]]}
     }
 

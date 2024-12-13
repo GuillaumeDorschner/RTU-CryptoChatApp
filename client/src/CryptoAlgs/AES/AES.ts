@@ -1,3 +1,4 @@
+import { PKCS7Impl } from "../Padding/PKCS7";
 import { WordArray } from "../Utils/WordArray";
 import { AESConstants, aesConstants } from "./AESConstants";
 interface AES {
@@ -11,6 +12,8 @@ class AESImpl {
     _key!: WordArray;
     _keySchedule!: Array<number>;
     _invKeySchedule!: Array<number>;
+
+    readonly paddingPKCS7: PKCS7Impl = (new PKCS7Impl)
 
     updateState(key: WordArray, aesConstants: AESConstants): {key: WordArray, keySchedule: number[], ikeySchedule: number[]} {
         if (this._nbRounds && this._key === key) {
@@ -160,25 +163,78 @@ class AESImpl {
         return [...Array(4).keys()].map(i=>xoredBlock[i] ^ xoringBlock[i])
     }
 
-    encryptBlock(block: number[], prevBlockOrIv: number[]): number[] {
+    encryptBlock(block: number[], prevBlockOrIv: number[], aesConstants: AESConstants): {prevBlock:number[], rslt:number[]} {
         const xoredBlock = this.xorBlock(block, prevBlockOrIv)
         const cypherText = this.cryptBlock(xoredBlock, this._keySchedule, [aesConstants.subMix0, aesConstants.subMix1, aesConstants.subMix2, aesConstants.subMix3], aesConstants.sbox)
-        return cypherText   
+        return {prevBlock:cypherText, rslt:cypherText}
     }
     
-    decryptBlock(block: number[], prevBlockOrIv: number[], aesConstants: AESConstants): number[] {
+    decryptBlock(block: number[], prevBlockOrIv: number[], aesConstants: AESConstants): {prevBlock:number[], rslt:number[]} {
 
 
         const newBlock = [block[0], block[3], block[2], block[1]]
 
-        const plainText = this.cryptBlock(newBlock, this._keySchedule, [aesConstants.subMix0, aesConstants.subMix1, aesConstants.subMix2, aesConstants.subMix3], aesConstants.sbox)
+        const deciphered = this.cryptBlock(newBlock, this._keySchedule, [aesConstants.invSubMix0, aesConstants.invSubMix1, aesConstants.invSubMix2, aesConstants.invSubMix3], aesConstants.invSBox)
 
-        const swappedAgain = [plainText[0], plainText[3], plainText[2], plainText[1]]
+        const swappedAgain = [deciphered[0], deciphered[3], deciphered[2], deciphered[1]]
 
         const xoredBlock = this.xorBlock(swappedAgain, prevBlockOrIv)
 
-        return xoredBlock
+        return {prevBlock:block, rslt:xoredBlock  }
     }
+
+    
+    processssssssRecurse(
+        message: WordArray, 
+        nBlocksReady: number,
+        processBlock: (block: number[], prevBlockOrIv: number[], aesConstants: AESConstants)=> {prevBlock:number[], rslt:number[]},
+        aesConstants: AESConstants,
+        blockStartIndex: number = 0,
+        processedWords: number[] = [], 
+        prevBlock: number[] = []
+    ): number[] {
+
+        if(blockStartIndex>nBlocksReady) return processedWords
+        const prevBlockOrIv = blockStartIndex>4 ? prevBlock : this.computeIV() 
+        const rslt: {prevBlock:number[], rslt:number[]} = processBlock(message.words.slice(blockStartIndex, blockStartIndex+4), prevBlockOrIv, aesConstants)
+        return this.processssssssRecurse(message, nBlocksReady, processBlock, 
+            aesConstants, blockStartIndex+4, [...processedWords, ...rslt.rslt], rslt.prevBlock)
+    }
+
+    process(
+        message: WordArray, 
+        aesConstants: AESConstants,
+        processBlock: (block: number[], prevBlockOrIv: number[], aesConstants: AESConstants)=> {prevBlock:number[], rslt:number[]} 
+    ) {
+
+        const blockSizeBytes = 16;
+        const nBlocksReady = Math.ceil(message.nbBytes / blockSizeBytes);
+        const nBytesReady = message.nbBytes;
+        const processedWords = this.processssssssRecurse(message, nBlocksReady, processBlock, aesConstants)
+
+        // Return processed words
+        return new WordArray(processedWords, nBytesReady);
+    }
+
+    encryptMessage(message: string, aesConstants: AESConstants): WordArray {
+        const waMessage: WordArray= WordArray.utf8StringToWordArray(message)
+        const padded: WordArray= this.paddingPKCS7.pad(waMessage, 16)
+        const processed: WordArray = this.process(padded, aesConstants, this.encryptBlock)
+        return processed
+    }
+
+    decryptMessage(cypheredMessage: WordArray, aesConstants:AESConstants): string {
+
+        const processed: WordArray = this.process(cypheredMessage, aesConstants, this.decryptBlock)
+        const unpadded: WordArray= this.paddingPKCS7.unpad(processed)
+        const stringified: string = WordArray.stringifyUtf8(unpadded)
+        return stringified
+    }
+
+    computeIV(){
+
+    }
+
 }
 
 
