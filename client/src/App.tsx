@@ -99,7 +99,11 @@ function App() {
         setUser({ id: userId, name: usernameInput.trim(), openChatId: null });
         setUsernameInput('');
       } catch (error) {
-        console.error('Error creating user:', error.message);
+        if (error instanceof Error) {
+          console.error('Error creating user:', error.message);
+        } else {
+          console.error('Unexpected error:', error);
+        }
       }
     } else {
       console.warn('Username cannot be empty.');
