@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
 
 jobs:
   build-and-publish:
@@ -26,16 +23,15 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Set lowercase variables
+        run: |
+          echo "lowercase_owner=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+          echo "lowercase_repo=$(echo '${{ github.event.repository.name }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
       - name: Build and Push Docker Image to GHCR
         run: |
           docker buildx build \
-            --platform linux/amd64,linux/arm64 \
             --push \
-            --tag ghcr.io/${{ github.repository_owner }}/rtu-cryptochatapp:latest \
-            --tag ghcr.io/${{ github.repository_owner }}/rtu-cryptochatapp:${{ github.sha }} \
+            --tag ghcr.io/${{ env.lowercase_owner }}/${{ env.lowercase_repo }}:latest \
+            --tag ghcr.io/${{ env.lowercase_owner }}/${{ env.lowercase_repo }}:${{ github.sha }} \
             .
-
-      - name: Pull and Test Docker Image
-        run: |
-          docker pull ghcr.io/${{ github.repository_owner }}/rtu-cryptochatapp:latest
-          docker run -d --rm -p 3000:3000 ghcr.io/${{ github.repository_owner }}/rtu-cryptochatapp:latest
