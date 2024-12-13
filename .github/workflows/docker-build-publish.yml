@@ -29,6 +29,9 @@ jobs:
           echo "lowercase_repo=$(echo '${{ github.event.repository.name }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
       - name: Build and Push Docker Image to GHCR
+        env:
+          lowercase_owner: ${{ env.lowercase_owner }}
+          lowercase_repo: ${{ env.lowercase_repo }}
         run: |
           docker buildx build \
             --push \
