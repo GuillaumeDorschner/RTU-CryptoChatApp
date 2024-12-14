@@ -54,7 +54,6 @@ class AESConstantsImpl {
     }
 
     private computeCounter(x: number, xi: number, mults: multiplications, doubles: number[]): {x: number, xi:number} {
-        /// wtf !x ???
         return !x ? {x:1,xi:1} : {x:(mults.x2 ^ doubles[doubles[doubles[mults.x8 ^ mults.x2]]]), xi: xi ^ doubles[doubles[xi]]}
     }
 
@@ -81,29 +80,29 @@ class AESConstantsImpl {
     }
 
     private startConstants: AESConstants = {
-        sbox:[],
-        invSBox: [],
+        sbox:Array<number>(256).fill(0x00, 0, 256),
+        invSBox: Array<number>(256).fill(0x00, 0, 256),
         rcon:[0x00, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36],
-        subMix0: [],
-        subMix1: [],
-        subMix2: [],
-        subMix3: [],
-        invSubMix0: [],
-        invSubMix1: [],
-        invSubMix2: [],
-        invSubMix3: []
+        subMix0: Array<number>(256).fill(0x00, 0, 256),
+        subMix1: Array<number>(256).fill(0x00, 0, 256),
+        subMix2: Array<number>(256).fill(0x00, 0, 256),
+        subMix3: Array<number>(256).fill(0x00, 0, 256),
+        invSubMix0: Array<number>(256).fill(0x00, 0, 256),
+        invSubMix1: Array<number>(256).fill(0x00, 0, 256),
+        invSubMix2: Array<number>(256).fill(0x00, 0, 256),
+        invSubMix3: Array<number>(256).fill(0x00, 0, 256)
     }
     private computeAESConstantsRecurse(
         doubles: number[], index: number=0, x:number=0, xi:number=0, resultingAESConstants: AESConstants = this.startConstants
             ): AESConstants {
             
-            if(index<256) return resultingAESConstants
+            if(index>=256) return resultingAESConstants
             const sboxElement: sboxElement = this.computeSBoxElement(x,xi)
             const mults: multiplications = this.computeMultiplications(doubles, x)
             const subMixElements: subMixElements = this.computeSubMixElements(doubles, sboxElement.sx)
             const invSubMixElements: invSubMixElements = this.computeInvSubMixElements(mults, x)
-            const counter: {x:number, xi:number} = this.computeCounter(x, xi, mults, doubles)
             const aesConstants: AESConstants = this.accumulateElements(resultingAESConstants, sboxElement, subMixElements, invSubMixElements)
+            const counter: {x:number, xi:number} = this.computeCounter(x, xi, mults, doubles)
             return this.computeAESConstantsRecurse(doubles, index+1, counter.x, counter.xi, aesConstants) 
     }
 
