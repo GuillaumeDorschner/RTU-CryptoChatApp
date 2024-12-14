@@ -5,12 +5,12 @@ import { v4 as uuidv4 } from 'uuid';
 type Message =
   | { type: 'generateUserId' }
   | { type: 'storeWebSocket'; userId: string }
-  | { type: 'relayPublicKey'; senderId: string; recipientId: string; publicKey: string }
+  | { type: 'relayPublicKey'; senderId: string; recipientId: string; publicKey: string; senderName: string }
   | { type: 'relayEncryptedMessage'; senderId: string; recipientId: string; encryptedMessage: string };
 
 type Response =
   | { type: 'generatedUserId'; userId: string }
-  | { type: 'publicKey'; senderId: string; publicKey: string }
+  | { type: 'publicKey'; senderId: string; publicKey: string; senderName: string }
   | { type: 'encryptedMessage'; senderId: string; encryptedMessage: string };
 
 const clients: Map<string, WebSocket> = new Map();
