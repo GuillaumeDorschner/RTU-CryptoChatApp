@@ -15,7 +15,7 @@ const Chat = () => {
     if (chatEndRef.current) {
       chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [chats]);
+  }, [chats, user.openChatId]);
 
   return (
     <div className="p-4 bg-bgCard rounded-lg h-full flex flex-col">
