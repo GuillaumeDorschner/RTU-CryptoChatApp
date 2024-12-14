@@ -21,11 +21,25 @@ export class AESImpl {
 
     init(passwordUtf8: string, keySize: number, aesConstants: AESConstants) {
         const keyAndIV = (new KeyIVUtils).computeDerivedKeyAndIV(passwordUtf8, keySize, 4)
-        this._iv = keyAndIV.iv
+        //const key = new WordArray([
+        //    653745428,
+        //    -162117686,
+        //    2145768267,
+        //    -1794206835,
+        //    278504082,
+        //    -801674998,
+        //    -1243076349,
+        //    -2119957319,
+        //    -2091216879,
+        //    -2003306387,
+        //    -222491591,
+        //    -1023359112,
+        //  ], 32)
+        this._iv = keyAndIV.iv //new WordArray( [-2091216879,-2003306387,-222491591,-1023359112,], 16)//
         this.updateState(keyAndIV.key, aesConstants)
     }
 
-    private updateState(key: WordArray, aesConstants: AESConstants): {key: WordArray, keySchedule: number[], ikeySchedule: number[]} {
+    updateState(key: WordArray, aesConstants: AESConstants): {key: WordArray, keySchedule: number[], ikeySchedule: number[]} {
         if (this._nbRounds && this._key === key) {
             return {key: this._key, keySchedule: this._keySchedule, ikeySchedule: this._invKeySchedule};
         }
@@ -43,7 +57,7 @@ export class AESImpl {
     }
 
 
-    private computeKeySchedule(keyWords: number[], keySize: number, ksRows: number, aesConstants: AESConstants) {
+    computeKeySchedule(keyWords: number[], keySize: number, ksRows: number, aesConstants: AESConstants) {
         
         const keySchedule: Array<number> = this._keySchedule = [];
         for (let ksRow = 0; ksRow < ksRows; ksRow++) {
@@ -103,7 +117,7 @@ export class AESImpl {
 
     }
 
-    private computeInvKeySchedule(keyWords: number[], keySize: number, ksRows: number, keySchedule: number[] , aesConstants: AESConstants): number[] {
+    computeInvKeySchedule(keyWords: number[], keySize: number, ksRows: number, keySchedule: number[] , aesConstants: AESConstants): number[] {
         
         const invKeySchedule: Array<number> = this._invKeySchedule = [];
         for (let invKsRow = 0; invKsRow < ksRows; invKsRow++) {
@@ -128,7 +142,7 @@ export class AESImpl {
     }
 
 
-    private subShift(word: number, subMixArray: number[], shiftAmmount: 24|16|8|0): number {
+    subShift(word: number, subMixArray: number[], shiftAmmount: 24|16|8|0): number {
         if(shiftAmmount==16||shiftAmmount==8||shiftAmmount==0){
             return subMixArray[(word >>> shiftAmmount) & 0xff]
         }
@@ -137,19 +151,19 @@ export class AESImpl {
         } 
     }
 
-    private mixColumns(bytes: number[]): number {
+    mixColumns(bytes: number[]): number {
         return bytes[0] ^ bytes[1] ^ bytes[2] ^ bytes[3]
     }
 
-    private combineFinalBytes(bytes: number[]): number {
+    combineFinalBytes(bytes: number[]): number {
         return bytes[0] << 24 | bytes[1] << 16 | bytes[2] << 8 | bytes[3]
     }
 
-    private addRoundKey(word: number, keySchedule: number[], ksRow: number): number {
+    addRoundKey(word: number, keySchedule: number[], ksRow: number): number {
         return word ^ keySchedule[ksRow]
     }
 
-    private doFinalRound(block: number[], sbox: number[], keySchedule: number[], ksRow: number): number[] {
+    doFinalRound(block: number[], sbox: number[], keySchedule: number[], ksRow: number): number[] {
         
         const subShiftedFinal0 = this.addRoundKey(this.combineFinalBytes([this.subShift(block[0], sbox, 24),this.subShift(block[1], sbox, 16),this.subShift(block[2], sbox, 8),this.subShift(block[3], sbox, 0)]), keySchedule, ksRow);    
         const subShiftedFinal1 = this.addRoundKey(this.combineFinalBytes([this.subShift(block[1], sbox, 24),this.subShift(block[2], sbox, 16),this.subShift(block[3], sbox, 8),this.subShift(block[0], sbox, 0)]), keySchedule, ksRow+1);   
@@ -160,7 +174,7 @@ export class AESImpl {
     }
 
 
-    private doRounds(block: number[], subMixArrays: number[][], keySchedule: number[], ksRow: number, nbRounds: number, round:number=1): number[] {
+    doRounds(block: number[], subMixArrays: number[][], keySchedule: number[], ksRow: number, nbRounds: number, round:number=1): number[] {
         
         if(round>nbRounds-1) return block
 
@@ -185,7 +199,7 @@ export class AESImpl {
     }
 
 
-    private cryptBlock(
+    cryptBlock(
         block: number[],
         keySchedule: number[],
         subMixArrays: number[][],
@@ -198,11 +212,11 @@ export class AESImpl {
         return this.doFinalRound(intermediateBlock, sbox, keySchedule, 4+4*(this._nbRounds-1))
     }
 
-    private xorBlock(xoredBlock: number[], xoringBlock: number[]): number[] {
+    xorBlock(xoredBlock: number[], xoringBlock: number[]): number[] {
         return [...Array(4).keys()].map(i=>xoredBlock[i] ^ xoringBlock[i])
     }
 
-    private encryptBlock(block: number[], prevBlockOrIv: number[], aesConstants: AESConstants): {prevBlock:number[], rslt:number[]} {
+    encryptBlock(block: number[], prevBlockOrIv: number[], aesConstants: AESConstants): {prevBlock:number[], rslt:number[]} {
         const xoredBlock = this.xorBlock(block, prevBlockOrIv)
         console.log("xoredBlock: "+NumberArrayToBinary(xoredBlock) )
         const cypherText = this.cryptBlock(xoredBlock, this._keySchedule, [aesConstants.subMix0, aesConstants.subMix1, aesConstants.subMix2, aesConstants.subMix3], aesConstants.sbox)
@@ -210,13 +224,13 @@ export class AESImpl {
         return {prevBlock:cypherText, rslt:cypherText}
     }
     
-    private decryptBlock(block: number[], prevBlockOrIv: number[], aesConstants: AESConstants): {prevBlock:number[], rslt:number[]} {
+    decryptBlock(block: number[], prevBlockOrIv: number[], aesConstants: AESConstants): {prevBlock:number[], rslt:number[]} {
 
 
         const newBlock = [block[0], block[3], block[2], block[1]]
         console.log("newBlock: "+NumberArrayToBinary(newBlock) )
 
-        const deciphered = this.cryptBlock(newBlock, this._keySchedule, [aesConstants.invSubMix0, aesConstants.invSubMix1, aesConstants.invSubMix2, aesConstants.invSubMix3], aesConstants.invSBox)
+        const deciphered = this.cryptBlock(newBlock, this._invKeySchedule, [aesConstants.invSubMix0, aesConstants.invSubMix1, aesConstants.invSubMix2, aesConstants.invSubMix3], aesConstants.invSBox)
         console.log("deciphered: "+NumberArrayToBinary(deciphered) )
 
         const swappedAgain = [deciphered[0], deciphered[3], deciphered[2], deciphered[1]]
@@ -228,7 +242,7 @@ export class AESImpl {
     }
 
     
-    private processssssssRecurse(
+    processssssssRecurse(
         message: WordArray, 
         nBlocksReady: number,
         processBlock: (block: number[], prevBlockOrIv: number[], aesConstants: AESConstants)=> {prevBlock:number[], rslt:number[]},
@@ -238,14 +252,14 @@ export class AESImpl {
         prevBlock: number[] = []
     ): number[] {
 
-        if(blockStartIndex>nBlocksReady) return processedWords
+        if(blockStartIndex>=nBlocksReady*4) return processedWords
         const prevBlockOrIv = blockStartIndex>4 ? prevBlock : this._iv.words
         const rslt: {prevBlock:number[], rslt:number[]} = processBlock(message.words.slice(blockStartIndex, blockStartIndex+4), prevBlockOrIv, aesConstants)
         return this.processssssssRecurse(message, nBlocksReady, processBlock, 
             aesConstants, blockStartIndex+4, [...processedWords, ...rslt.rslt], rslt.prevBlock)
     }
 
-    private process(
+    process(
         message: WordArray, 
         aesConstants: AESConstants,
         processBlock: (block: number[], prevBlockOrIv: number[], aesConstants: AESConstants)=> {prevBlock:number[], rslt:number[]} 

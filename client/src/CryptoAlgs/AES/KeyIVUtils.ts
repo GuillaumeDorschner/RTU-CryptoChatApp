@@ -3,7 +3,7 @@ import { Md5 } from "ts-md5";
 
 export class KeyIVUtils {
 
-    private narrowToNbArr(input: string | Int32Array<ArrayBufferLike> | undefined): number[] {
+    narrowToNbArr(input: string | Int32Array<ArrayBufferLike> | undefined): number[] {
         if(input instanceof Int32Array){
             return Array.from(input);
         }
@@ -11,7 +11,7 @@ export class KeyIVUtils {
         throw new Error("input was not instance of Int32Array")
     }
 
-    private computeDerivedKeyRecurse(hasher: Md5, password: WordArray, salt: WordArray, 
+    computeDerivedKeyRecurse(hasher: Md5, password: WordArray, salt: WordArray, 
         iterations: number, keySize: number, prevBlock: number[]= [], resultDerivedKey:WordArray= new WordArray([], 0)): WordArray {
         
         if(resultDerivedKey.words.length>= keySize) return resultDerivedKey
@@ -35,7 +35,7 @@ export class KeyIVUtils {
 
     }
 
-    private computeDerivedKey(password: WordArray, salt: WordArray, keySize: number, iterations: number): WordArray {
+    computeDerivedKey(password: WordArray, salt: WordArray, keySize: number, iterations: number): WordArray {
         // Init hasher²
         const hasher = new Md5();
 

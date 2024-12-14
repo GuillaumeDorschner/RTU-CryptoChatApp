@@ -28,32 +28,6 @@ export class WordArray implements WordArray {
         return clampedLeft.concatRecurse(wordArray)
     }
 
-    //private concatRecurse(wordArray: WordArray, index: number=0): WordArray {
-//
-    //    if(index>wordArray.nbBytes) return this
-    //    
-    //    if(this.nbBytes %4){
-//
-    //        const thatByte = (wordArray.words[index >>> 2] >>> (24 - (index % 4) * 8)) & 0xff;
-    //        return (new WordArray(
-    //            this.words.slice(0, Math.floor(this.nbBytes/4))
-    //                .concat(this.words[(this.nbBytes + index) >>> 2] | thatByte << (24 - ((this.nbBytes + index) % 4) * 8)),
-    //            this.nbBytes+1
-    //        )).concatRecurse(wordArray, index+1)
-    //        
-    //    }
-    //    else{
-    //        return (new WordArray(
-    //            this.words.slice(0, Math.floor(this.nbBytes/4))
-    //                .concat(wordArray.words[index>>2]),
-    //            this.nbBytes+1
-    //        )).concatRecurse(wordArray, index+4)
-//
-//
-    //    }
-//
-    //}
-
     private concatRecurse(wordArray: WordArray): WordArray {
 
         if(wordArray.nbBytes<=0) return this
