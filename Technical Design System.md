@@ -52,7 +52,13 @@ sequenceDiagram
 
 ### **2. Key Exchange Workflow**
 
-Securely exchange ECDH keys and establish an AES key for chat encryption. [Wikipedia](https://en.wikipedia.org/wiki/Elliptic-curve_Diffie–Hellman)
+Securely exchange ECDH keys and establish an AES key for chat encryption. [Wikipedia](https://en.wikipedia.org/wiki/Elliptic-curve_Diffie–Hellman). We will use the Curve 25519 for the ECDH key exchange, but we can specify any following curve (secp256k1, secp256r1, secp384r1, secp521r1).
+At the end we get posiion of the key in the curve and we can generate the same key for both users. We will use only the x coordinate of the key (it's very common) and we will use it as the key for the AES encryption. Before using the shared secret we need to verify if the point does fall into the curve if so we will derive the key using a [KDF (Key Derivation Function)](https://en.wikipedia.org/wiki/Key_derivation_function) to make it more secure.
+
+<p align="center">
+<img src="./img/EC_anim.gif"/>
+<p align="center" >Example of the Elliptic Curve</p>
+</p>
 
 ```mermaid
 sequenceDiagram
@@ -109,9 +115,12 @@ classDiagram
         +clearLocalStorage(): void
         +deleteChat(chatId: String): void
     }
+
     class ECDH {
-        +generateKeyPair(): KeyPair
-        +computeSharedKey(privateKey: String, publicKey: String): String
+        +generateKeyPair(curveName: String = "curve25519"): KeyPair
+        +computeSharedSecret(privateKey: String, publicKey: String, curveName: String = "curve25519"): String
+        +deriveAESKey(sharedSecret: String, salt: String = "", info: String = ""): String
+        +validatePublicKey(publicKey: String, curveName: String = "curve25519"): Boolean
     }
 
     class KeyPair {
