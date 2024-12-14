@@ -50,7 +50,7 @@ function App() {
     };
 
     initializeData();
-  }, [setUser, setChats, setSettings]);
+  }, [setUser, setChats, setSettings, ws]);
 
   useEffect(() => {
     if (user) {
