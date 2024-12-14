@@ -38,6 +38,12 @@ importers:
       shared:
         specifier: link:../shared
         version: link:../shared
+      ts-matrix:
+        specifier: ^1.3.2
+        version: 1.3.2
+      ts-md5:
+        specifier: ^1.3.1
+        version: 1.3.1
     devDependencies:
       '@eslint/js':
         specifier: ^9.15.0
@@ -1691,6 +1697,13 @@ packages:
 
   ts-interface-checker@0.1.13:
     resolution: {integrity: sha512-Y/arvbn+rrz3JCKl9C4kVNfTfSm2/mEp5FSz5EsZSANGPSlQrpRI5M4PKF+mJnE52jOO90PnPSc3Ur3bTQw0gA==}
+
+  ts-matrix@1.3.2:
+    resolution: {integrity: sha512-71NJc7aHSmzWa1xzgLpq0eusWK3YRhBiRJ3sJ1WdaDyQ0q0O0ABELB9iYN1lRIrdTRLAKfsUqaFdXQoV//tDCQ==}
+
+  ts-md5@1.3.1:
+    resolution: {integrity: sha512-DiwiXfwvcTeZ5wCE0z+2A9EseZsztaiZtGrtSaY5JOD7ekPnR/GoIVD5gXZAlK9Na9Kvpo9Waz5rW64WKAWApg==}
+    engines: {node: '>=12'}
 
   ts-node@10.9.2:
     resolution: {integrity: sha512-f0FFpIdcHgn8zcPSbf1dRevwt047YMnaiJM3u2w2RewrB+fob/zePZcrOyQoLMMO7aBIddLcQIEK5dYjkLnGrQ==}
@@ -3438,6 +3451,10 @@ snapshots:
       typescript: 5.6.3
 
   ts-interface-checker@0.1.13: {}
+
+  ts-matrix@1.3.2: {}
+
+  ts-md5@1.3.1: {}
 
   ts-node@10.9.2(@types/node@22.10.1)(typescript@5.6.3):
     dependencies:
