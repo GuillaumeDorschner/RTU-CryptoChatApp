@@ -51,16 +51,30 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
         setUser((prevUser) => ({ ...prevUser, id: message.userId }));
       }
 
-      if (message.type === 'relayEncryptedMessage') {
+      // TODO: create a new chat i don't think this work
+      if (message.type === 'publicKey') {
         setChats((prevChats) =>
           prevChats.map((chat) =>
-            chat.id === message.recipientId
+            user?.id === message.senderId
+              ? {
+                  ...chat,
+                  AESkey: message.publicKey,
+                }
+              : chat,
+          ),
+        );
+      }
+
+      if (message.type === 'encryptedMessage') {
+        setChats((prevChats) =>
+          prevChats.map((chat) =>
+            chat.participantId === message.senderId
               ? {
                   ...chat,
                   messages: [
                     ...chat.messages,
                     {
-                      text: message.encryptedMessage, // TODO: Decrypt message
+                      text: message.encryptedMessage,
                       senderId: message.senderId,
                       time: new Date(),
                     },
