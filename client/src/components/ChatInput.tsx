@@ -34,6 +34,8 @@ const ChatInput = () => {
         chat.id === user.openChatId ? { ...chat, messages: [...chat.messages, newMessage] } : chat,
       );
 
+      //TODO: Send to server as encrypted message
+
       setChats(updatedChats);
       setMessageInput('');
     }
