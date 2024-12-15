@@ -47,9 +47,9 @@ export const startWebSocketServer = (port: number) => {
             if (!clients.has(message.userId)) {
               userId = message.userId;
               clients.set(userId, ws);
-              console.log(`User connected: ${userId}`);
+              console.log('\x1b[32m%s\x1b[0m', `User connected: ${userId}`);
             } else {
-              console.warn(`User ID ${message.userId} is already connected.`);
+              console.warn('\x1b[33m%s\x1b[0m', `User ID ${message.userId} is already connected.`);
             }
             break;
 
@@ -77,7 +77,7 @@ export const startWebSocketServer = (port: number) => {
 
     ws.on('close', () => {
       if (userId) {
-        console.log(`User disconnected: ${userId}`);
+        console.log('\x1b[31m%s\x1b[0m', `User disconnected: ${userId}`);
         clients.delete(userId);
       }
     });
