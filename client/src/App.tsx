@@ -1,5 +1,7 @@
+// TODO: remove shared folder
 import './App.css';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 import Sidebar from './components/Sidebar';
 import ChatHeader from './components/ChatHeader';
@@ -10,105 +12,80 @@ import ChatSettingsDrawer from './components/ChatSettingsDrawer';
 import { useChatContext } from './context/ChatContext';
 
 function App() {
-  const { user, setUser, chats, setChats, settings, setSettings, ws } = useChatContext();
+  const { user, setUser, chats, setChats, settings, setSettings, setWebSocket } = useChatContext();
   const [usernameInput, setUsernameInput] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const wsRef = useRef<WebSocket | null>(null);
 
-  useEffect(() => {
-    const initializeData = async () => {
-      const storedUserId = document.cookie
-        .split('; ')
-        .find((row) => row.startsWith('userId='))
-        ?.split('=')[1];
-      const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-      const storedChats = localStorage.getItem('chats');
-      const storedSettings = JSON.parse(localStorage.getItem('settings') || '{}');
+  const initializeWebSocket = (userId: string) => {
+    if (!wsRef.current) {
+      const host = window.location.hostname;
+      const socketUrl = `ws://${host}:3001`;
+      const ws = new WebSocket(socketUrl);
+      wsRef.current = ws;
 
-      if (storedUserId) {
-        ws?.send(
-          JSON.stringify({
-            type: 'storeWebSocket',
-            userId: storedUserId,
-          }),
-        );
-      }
-      const user =
-        storedUserId && storedUser
-          ? { id: storedUserId, name: storedUser.name, openChatId: parseFloat(storedUser.openChatId) }
-          : null;
-      const chats = storedChats ? JSON.parse(storedChats) : [];
-      const settings = {
-        theme: storedSettings.theme || 'light',
-        open: storedSettings.open || false,
+      ws.onopen = () => {
+        console.log('WebSocket connected');
+        ws.send(JSON.stringify({ type: 'connect', userId }));
       };
 
+      ws.onmessage = (event) => {
+        const message = JSON.parse(event.data);
+        console.log('Received WebSocket message:', message);
+        // Handle WebSocket messages in ChatContext
+      };
+
+      ws.onclose = () => {
+        console.log('WebSocket closed');
+        wsRef.current = null;
+      };
+
+      setWebSocket(ws);
+    }
+  };
+
+  const initializeUser = () => {
+    const storedUserId = document.cookie
+      .split('; ')
+      .find((row) => row.startsWith('userId='))
+      ?.split('=')[1];
+    const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const storedChats = localStorage.getItem('chats');
+    const storedSettings = JSON.parse(localStorage.getItem('settings') || '{}');
+
+    if (storedUserId) {
+      const user = {
+        id: storedUserId,
+        name: storedUser.name || '',
+        openChatId: storedUser.openChatId || null,
+      };
       setUser(user);
-      setChats(chats);
-      setSettings(settings);
-
-      setIsLoading(false);
-    };
-
-    initializeData();
-  }, [setUser, setChats, setSettings, ws]);
-
-  useEffect(() => {
-    if (user) {
-      localStorage.setItem('user', JSON.stringify(user));
+      setChats(storedChats ? JSON.parse(storedChats) : []);
+      setSettings({
+        theme: storedSettings.theme || 'light',
+        open: storedSettings.open || false,
+      });
+      initializeWebSocket(storedUserId);
     }
-  }, [user]);
+    setIsLoading(false);
+  };
 
-  useEffect(() => {
-    if (chats.length) {
-      localStorage.setItem('chats', JSON.stringify(chats));
-    }
-  }, [chats]);
-
-  useEffect(() => {
-    if (settings) {
-      localStorage.setItem('settings', JSON.stringify(settings));
-    }
-  }, [settings]);
-
-  const handleUsernameSubmit = async () => {
+  const handleUsernameSubmit = () => {
     if (usernameInput.trim()) {
-      try {
-        const response = await fetch('http://localhost:3000/api/generateUserId', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ name: usernameInput.trim() }),
-        });
-
-        if (!response.ok) {
-          throw new Error(`Server responded with status ${response.status}`);
-        }
-
-        const { userId } = await response.json();
-
-        document.cookie = `userId=${userId}`;
-
-        ws?.send(
-          JSON.stringify({
-            type: 'storeWebSocket',
-            userId,
-          }),
-        );
-
-        setUser({ id: userId, name: usernameInput.trim(), openChatId: null });
-        setUsernameInput('');
-      } catch (error) {
-        if (error instanceof Error) {
-          console.error('Error creating user:', error.message);
-        } else {
-          console.error('Unexpected error:', error);
-        }
-      }
+      const userId = uuidv4();
+      document.cookie = `userId=${userId}; path=/`;
+      const newUser = { id: userId, name: usernameInput.trim(), openChatId: null };
+      setUser(newUser);
+      initializeWebSocket(userId);
+      setUsernameInput('');
     } else {
       console.warn('Username cannot be empty.');
     }
   };
+
+  useEffect(() => {
+    initializeUser();
+  }, []);
 
   if (isLoading) {
     return (
