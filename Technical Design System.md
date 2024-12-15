@@ -40,14 +40,11 @@ sequenceDiagram
     A-->>A: Does browser have cookie ID?
     Note over A: No
     A-->>A: Enter username
-    A->>S: Send request
-    S-->>S: Generate user ID and store in memory
-    S-->>A: Return home page with ID
+    A-->>A: Generate user ID
     Note over A: Yes
-    A-->>A: Keep session active
-    A-->>A: User connected
-    A->>S: Send ID + WebSocket connection
-    S->>S: Store websocket connection in map
+    A-->>A: Session restored
+    A->>S: WebSocket on connect
+    S->>S: Store in map (ID, WebSocket)
 ```
 
 ### **2. Key Exchange Workflow**
@@ -67,10 +64,12 @@ sequenceDiagram
     participant B as Bob (User)
 
     Note over A,B: Key Exchange Phase
-    A->>S: Send ECDH Public Key
-    S-->>B: Relay Alice's ECDH Public Key
-    B->>S: Send ECDH Public Key
-    S-->>A: Relay Bob's ECDH Public Key
+    A->>A: Generate ECDH Key Pair
+    A->>S: Send ECDH Public Key One
+    S-->>B: Relay Alice's ECDH Public Key One
+    B->>B: Generate ECDH Key Pair
+    B->>S: Send ECDH Public Key Two
+    S-->>A: Relay Bob's ECDH Public Key Two
     A->>A: Compute Shared Secret with Bob's Public Key
     B->>B: Compute Shared Secret with Alice's Public Key
     A->>A: Derive AES Key from Shared Secret
@@ -102,10 +101,10 @@ sequenceDiagram
 
 This diagram outlines the key components of the system and their interactions.
 
+#### Frontend
+
 ```mermaid
 classDiagram
-
-
     class Client {
         +sendMessage(message: String): void
         +receiveMessage(message: String): void
@@ -128,22 +127,10 @@ classDiagram
         +privateKey: String
     }
 
-    class Server {
-        +generateUserId(username: String): String
-        +relayPublicKey(senderId: String, recipientId: String, publicKey: String): void
-        +relayEncryptedMessage(senderId: String, recipientId: String, encryptedMessage: String): void
-        +clearUserSession(userId: String): void
-    }
 
     class AES {
         +encrypt(data: String, key: String): String
         +decrypt(data: String, key: String): String
-    }
-
-    class ChatManager {
-        +createChat(userId: String, recipientId: String): String
-        +deleteChat(chatId: String): void
-        +listChats(userId: String): Chat[]
     }
 
     class Chat {
@@ -158,11 +145,34 @@ classDiagram
         +timestamp: Date
     }
 
-    Client --|> ECDH
-    Client --|> AES
-    Client --> ChatManager
-    ChatManager --> Chat
-    Chat --> Message
+    client --|> ECDH
+    client --|> AES
+```
+
+#### Backend
+
+```mermaid
+classDiagram
+    class Server {
+        +generateUserId(username: String): String
+        +relayPublicKey(senderId: String, recipientId: String, publicKey: String): void
+        +relayEncryptedMessage(senderId: String, recipientId: String, encryptedMessage: String): void
+        +clearUserSession(userId: String): void
+    }
+
+    class WebSocket {
+        +onConnect(userId: String): void
+        +onMessage(userId: String, message: String): void
+        +onDisconnect(userId: String): void
+    }
+
+    class Api {
+        +createChat(userId: String, recipientId: String): void
+        +deleteChat(userId: String, chatId: String): void
+    }
+
+    Server --|> WebSocket
+    Server --|> Api
 ```
 
 ## **Storage Strategy**

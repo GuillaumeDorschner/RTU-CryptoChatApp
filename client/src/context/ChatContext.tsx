@@ -10,7 +10,11 @@ type Chat = {
   id: number;
   name: string;
   participantId: string;
-  AESkey: string;
+  cryptographie: {
+    AESkey: string;
+    publicKey: string;
+    privateKey: string;
+  };
   messages: Message[];
 };
 
@@ -48,35 +52,88 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
     (event: MessageEvent) => {
       const message = JSON.parse(event.data);
 
-      // TODO: create a new chat i don't think this work
       if (message.type === 'publicKeyOne') {
         console.log('public key received', message);
 
-        console.log(user);
+        // TODO: use ecdh
+        const randomId = Math.floor(Math.random() * 1000); // TODO: remove
+        const randomPublic = Math.floor(Math.random() * 1000); // TODO: remove
+        const randomPrivate = Math.floor(Math.random() * 1000); // TODO: remove
 
-        const newMessage = {
+        const data = {
           type: 'relayPublicKey',
           keyType: 'publicKeyTwo',
           senderId: user?.id,
           recipientId: message.senderId,
-          publicKey: 'heyydfskjfhsdkj 2',
+          publicKey: randomPublic,
           senderName: user?.name,
         };
 
-        ws?.send(JSON.stringify(newMessage));
+        ws?.send(JSON.stringify(data));
 
-        console.log('public key sent', newMessage);
+        console.log('public key sent', data);
+
+        const newChat = {
+          id: randomId,
+          name: message.senderName,
+          participantId: message.senderId,
+          cryptographie: {
+            AESkey: '',
+            publicKey: randomPublic,
+            privateKey: randomPrivate,
+          },
+          messages: [],
+        };
+
+        setChats([...chats, newChat]);
+
+        console.log('chats: ', chats);
+
+        const publicKey = message.publicKey;
+        const chat = chats.find((chat) => chat.participantId === message.senderId);
+
+        if (!chat) return;
+
+        const privateKey = chat.cryptographie.privateKey;
+
+        //TODO: calculate shared key otherPubicKey * privateKey
+        chat.cryptographie.AESkey = 'one'; // sharedSecret(publicKey, privateKey);
       }
 
       if (message.type === 'publicKeyTwo') {
         console.log('public key received', message);
+
+        const publicKey = message.publicKey;
+        const name = message.senderName;
+        const chat = chats.find((chat) => chat.participantId === message.senderId);
+
+        if (!chat) return;
+
+        const privateKey = chat.cryptographie.privateKey;
+        //TODO: calculate shared key otherPubicKey * privateKey
+        setChats(
+          chats.map((chat) =>
+            chat.participantId === message.senderId
+              ? {
+                  ...chat,
+                  cryptographie: {
+                    ...chat.cryptographie,
+                    AESkey: 'two', // sharedSecret(publicKey, privateKey),
+                  },
+                  name,
+                }
+              : chat,
+          ),
+        );
+
+        console.log('chats: ', chat);
       }
 
       if (message.type === 'encryptedMessage') {
         console.log('encrypted message received', message);
       }
     },
-    [setChats, user],
+    [user],
   );
 
   useEffect(() => {

@@ -87,6 +87,12 @@ function App() {
     initializeUser();
   }, []);
 
+  useEffect(() => {
+    console.log('User:', user);
+    console.log('Chats:', chats);
+    console.log('Settings', settings);
+  }, [user, chats, settings]);
+
   if (isLoading) {
     return (
       <div className="h-screen w-full flex justify-center items-center bg-bgGlobal text-text">

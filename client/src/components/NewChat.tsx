@@ -9,20 +9,39 @@ const NewChat = () => {
   const handleNewChat = async () => {
     if (newChatId.trim() === '') return;
 
+    const randomId = Math.floor(Math.random() * 1000); // TODO: remove
+    const randomPublic = Math.floor(Math.random() * 1000); // TODO: remove
+    const randomPrivate = Math.floor(Math.random() * 1000); // TODO: remove
+
     const data = {
       type: 'relayPublicKey',
       keyType: 'publicKeyOne',
       senderId: user?.id,
       recipientId: newChatId,
-      publicKey: 'heyydfskjfhsdkj 1', // TODO: ECDH
+      publicKey: randomPublic, // TODO: ECDH key pair
       senderName: user?.name,
     };
 
-    // TODO: Send request to server to create new chat
     ws?.send(JSON.stringify(data));
 
     // TODO fail alert user not found
     // TODO fail alert user already in chat
+
+    const newChat = {
+      id: randomId,
+      name: '',
+      participantId: newChatId,
+      cryptographie: {
+        AESkey: '',
+        publicKey: randomPublic,
+        privateKey: randomPrivate,
+      },
+      messages: [],
+    };
+
+    setChats([...chats, newChat]);
+
+    console.log('chats: ', chats);
   };
   return (
     <div className="flex flex-col max-w-full p-4 mb-4 rounded-lg bg-bgCard">
