@@ -69,57 +69,22 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
         ws?.send(JSON.stringify(newMessage));
 
         console.log('public key sent', newMessage);
-
-        // setChats((prevChats) =>
-        //   prevChats.map((chat) =>
-        //     user?.id === message.senderId
-        //       ? {
-        //           ...chat,
-        //           AESkey: message.publicKey,
-        //         }
-        //       : chat,
-        //   ),
-        // );
       }
 
       if (message.type === 'publicKeyTwo') {
         console.log('public key received', message);
-        // setChats((prevChats) =>
-        //   prevChats.map((chat) =>
-        //     user?.id === message.senderId
-        //       ? {
-        //           ...chat,
-        //           AESkey: message.publicKey,
-        //         }
-        //       : chat,
-        //   ),
-        // );
       }
 
       if (message.type === 'encryptedMessage') {
-        setChats((prevChats) =>
-          prevChats.map((chat) =>
-            chat.participantId === message.senderId
-              ? {
-                  ...chat,
-                  messages: [
-                    ...chat.messages,
-                    {
-                      text: message.encryptedMessage,
-                      senderId: message.senderId,
-                      time: new Date(),
-                    },
-                  ],
-                }
-              : chat,
-          ),
-        );
+        console.log('encrypted message received', message);
       }
     },
     [setChats],
   );
 
-  const ws = useWebSocket('ws://localhost:3001', handleWebSocketMessage);
+  if (user) {
+    const ws = useWebSocket('ws://localhost:3001', handleWebSocketMessage);
+  }
 
   const contextValue = useMemo(
     () => ({

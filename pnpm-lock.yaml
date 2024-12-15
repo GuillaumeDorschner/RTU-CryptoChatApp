@@ -38,6 +38,9 @@ importers:
       shared:
         specifier: link:../shared
         version: link:../shared
+      uuid:
+        specifier: ^11.0.3
+        version: 11.0.3
     devDependencies:
       '@eslint/js':
         specifier: ^9.15.0
