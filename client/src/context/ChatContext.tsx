@@ -1,5 +1,4 @@
-import { createContext, useContext, useState, useMemo, ReactNode, useCallback } from 'react';
-import { useWebSocket } from '../hooks/useWebSocket';
+import { createContext, useContext, useState, useMemo, ReactNode, useCallback, useEffect } from 'react';
 
 type Message = {
   text: string;
@@ -34,6 +33,7 @@ type ChatContextType = {
   settings: Settings | null;
   setSettings: (settings: Settings) => void;
   ws: WebSocket | null;
+  setWebSocket: (ws: WebSocket) => void;
 };
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -42,14 +42,11 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [chats, setChats] = useState<Chat[]>([]);
   const [settings, setSettings] = useState<Settings | null>(null);
+  const [ws, setWebSocket] = useState<WebSocket | null>(null);
 
   const handleWebSocketMessage = useCallback(
     (event: MessageEvent) => {
       const message = JSON.parse(event.data);
-
-      if (message.type === 'generatedUserId') {
-        setUser((prevUser) => ({ ...prevUser, id: message.userId }));
-      }
 
       // TODO: create a new chat i don't think this work
       if (message.type === 'publicKeyOne') {
@@ -82,9 +79,11 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
     [setChats],
   );
 
-  if (user) {
-    const ws = useWebSocket('ws://localhost:3001', handleWebSocketMessage);
-  }
+  useEffect(() => {
+    if (ws) {
+      ws.onmessage = handleWebSocketMessage;
+    }
+  }, [ws, handleWebSocketMessage]);
 
   const contextValue = useMemo(
     () => ({
@@ -95,6 +94,7 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
       settings,
       setSettings,
       ws,
+      setWebSocket,
     }),
     [user, chats, settings, ws],
   );
