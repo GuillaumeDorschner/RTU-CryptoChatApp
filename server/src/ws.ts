@@ -5,12 +5,19 @@ import { v4 as uuidv4 } from 'uuid';
 type Message =
   | { type: 'generateUserId' }
   | { type: 'storeWebSocket'; userId: string }
-  | { type: 'relayPublicKey'; senderId: string; recipientId: string; publicKey: string; senderName: string }
+  | {
+      type: 'relayPublicKey';
+      keyType: 'publicKeyOne' | 'publicKeyTwo';
+      senderId: string;
+      recipientId: string;
+      publicKey: string;
+      senderName: string;
+    }
   | { type: 'relayEncryptedMessage'; senderId: string; recipientId: string; encryptedMessage: string };
 
 type Response =
   | { type: 'generatedUserId'; userId: string }
-  | { type: 'publicKey'; senderId: string; publicKey: string; senderName: string }
+  | { type: 'publicKeyOne' | 'publicKeyTwo'; senderId: string; publicKey: string; senderName: string }
   | { type: 'encryptedMessage'; senderId: string; encryptedMessage: string };
 
 const clients: Map<string, WebSocket> = new Map();
@@ -49,11 +56,12 @@ export const startWebSocketServer = (port: number) => {
             console.log(`Stored WebSocket for user: ${userId}`);
             break;
 
-          case 'relayPublicKey':
-            const { senderId, recipientId, publicKey } = message;
-            console.log(`Relaying public key from ${senderId} to ${recipientId}`);
-            sendToClient(recipientId, { type: 'publicKey', senderId, publicKey });
+          case 'relayPublicKey': {
+            const { keyType, senderId, recipientId, publicKey, senderName } = message;
+            console.log(`Relaying ${keyType} from ${senderId} to ${recipientId}`);
+            sendToClient(recipientId, { type: keyType, senderId, publicKey, senderName });
             break;
+          }
 
           case 'relayEncryptedMessage':
             const { senderId: msgSenderId, recipientId: msgRecipientId, encryptedMessage } = message;

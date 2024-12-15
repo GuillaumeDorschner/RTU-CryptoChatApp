@@ -12,13 +12,16 @@ const NewChat = () => {
     console.log('Creating new chat with user ID:', newChatId);
 
     // TODO: Send request to server to create new chat
-    // ws?.send(
-    //   JSON.stringify({
-    //     type: 'newChat',
-    //     userId: user.id,
-    //     newChatId,
-    //   }),
-    // );
+    ws?.send(
+      JSON.stringify({
+        type: 'relayPublicKey',
+        keyType: 'publicKeyOne',
+        senderId: user?.id,
+        recipientId: newChatId,
+        publicKey: 'heyydfskjfhsdkj 1', // ECDH
+        senderName: user?.name,
+      }),
+    );
 
     // TODO fail alert user not found
     // TODO fail alert user already in chat
@@ -38,6 +41,7 @@ const NewChat = () => {
           if (e.key === 'Enter') handleNewChat();
         }}
       />
+      <p>my id: {user?.id})</p>
     </div>
   );
 };

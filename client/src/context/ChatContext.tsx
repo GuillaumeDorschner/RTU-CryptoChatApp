@@ -52,17 +52,48 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
       }
 
       // TODO: create a new chat i don't think this work
-      if (message.type === 'publicKey') {
-        setChats((prevChats) =>
-          prevChats.map((chat) =>
-            user?.id === message.senderId
-              ? {
-                  ...chat,
-                  AESkey: message.publicKey,
-                }
-              : chat,
-          ),
-        );
+      if (message.type === 'publicKeyOne') {
+        console.log('public key received', message);
+
+        console.log(user);
+
+        const newMessage = {
+          type: 'relayPublicKey',
+          keyType: 'publicKeyTwo',
+          senderId: user?.id,
+          recipientId: message.senderId,
+          publicKey: 'heyydfskjfhsdkj 2',
+          senderName: user?.name,
+        };
+
+        ws?.send(JSON.stringify(newMessage));
+
+        console.log('public key sent', newMessage);
+
+        // setChats((prevChats) =>
+        //   prevChats.map((chat) =>
+        //     user?.id === message.senderId
+        //       ? {
+        //           ...chat,
+        //           AESkey: message.publicKey,
+        //         }
+        //       : chat,
+        //   ),
+        // );
+      }
+
+      if (message.type === 'publicKeyTwo') {
+        console.log('public key received', message);
+        // setChats((prevChats) =>
+        //   prevChats.map((chat) =>
+        //     user?.id === message.senderId
+        //       ? {
+        //           ...chat,
+        //           AESkey: message.publicKey,
+        //         }
+        //       : chat,
+        //   ),
+        // );
       }
 
       if (message.type === 'encryptedMessage') {
