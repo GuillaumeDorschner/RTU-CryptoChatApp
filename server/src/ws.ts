@@ -1,10 +1,8 @@
 import { WebSocketServer } from 'ws';
 import type { WebSocket } from 'ws';
-import { v4 as uuidv4 } from 'uuid';
 
 type Message =
-  | { type: 'generateUserId' }
-  | { type: 'storeWebSocket'; userId: string }
+  | { type: 'connect'; userId: string }
   | {
       type: 'relayPublicKey';
       keyType: 'publicKeyOne' | 'publicKeyTwo';
@@ -16,7 +14,6 @@ type Message =
   | { type: 'relayEncryptedMessage'; senderId: string; recipientId: string; encryptedMessage: string };
 
 type Response =
-  | { type: 'generatedUserId'; userId: string }
   | { type: 'publicKeyOne' | 'publicKeyTwo'; senderId: string; publicKey: string; senderName: string }
   | { type: 'encryptedMessage'; senderId: string; encryptedMessage: string };
 
@@ -31,29 +28,29 @@ export const startWebSocketServer = (port: number) => {
     const client = clients.get(recipientId);
     if (client && client.readyState === client.OPEN) {
       client.send(JSON.stringify(message));
+    } else {
+      console.warn(`Recipient ${recipientId} is not connected.`);
     }
   };
 
   wss.on('connection', (ws) => {
     let userId: string | null = null;
 
-    console.log('User connected');
+    console.log('New WebSocket connection established.');
 
     ws.on('message', (data) => {
       try {
         const message: Message = JSON.parse(data.toString());
 
         switch (message.type) {
-          case 'generateUserId':
-            userId = uuidv4();
-            clients.set(userId, ws);
-            console.log(`User connected: ${userId}`);
-            break;
-
-          case 'storeWebSocket':
-            userId = message.userId;
-            clients.set(userId, ws);
-            console.log(`Stored WebSocket for user: ${userId}`);
+          case 'connect':
+            if (!clients.has(message.userId)) {
+              userId = message.userId;
+              clients.set(userId, ws);
+              console.log(`User connected: ${userId}`);
+            } else {
+              console.warn(`User ID ${message.userId} is already connected.`);
+            }
             break;
 
           case 'relayPublicKey': {
@@ -63,14 +60,15 @@ export const startWebSocketServer = (port: number) => {
             break;
           }
 
-          case 'relayEncryptedMessage':
-            const { senderId: msgSenderId, recipientId: msgRecipientId, encryptedMessage } = message;
-            console.log(`Relaying message from ${msgSenderId} to ${msgRecipientId}`);
-            sendToClient(msgRecipientId, { type: 'encryptedMessage', senderId: msgSenderId, encryptedMessage });
+          case 'relayEncryptedMessage': {
+            const { senderId, recipientId, encryptedMessage } = message;
+            console.log(`Relaying message from ${senderId} to ${recipientId}`);
+            sendToClient(recipientId, { type: 'encryptedMessage', senderId, encryptedMessage });
             break;
+          }
 
           default:
-            console.log('Unknown message type');
+            console.warn('Unknown message type:');
         }
       } catch (error) {
         console.error('Error processing message:', error);

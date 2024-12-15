@@ -10,6 +10,14 @@ const NewChat = () => {
     if (newChatId.trim() === '') return;
 
     console.log('Creating new chat with user ID:', newChatId);
+    console.log({
+      type: 'relayPublicKey',
+      keyType: 'publicKeyOne',
+      senderId: user?.id,
+      recipientId: newChatId,
+      publicKey: 'heyydfskjfhsdkj 1', // ECDH
+      senderName: user?.name,
+    });
 
     // TODO: Send request to server to create new chat
     ws?.send(

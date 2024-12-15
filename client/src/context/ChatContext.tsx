@@ -76,7 +76,7 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
         console.log('encrypted message received', message);
       }
     },
-    [setChats],
+    [setChats, user],
   );
 
   useEffect(() => {
