@@ -18,7 +18,9 @@ function App() {
 
   const initializeWebSocket = (userId: string) => {
     if (!wsRef.current) {
-      const ws = new WebSocket('ws://localhost:3001');
+      const host = window.location.hostname;
+      const socketUrl = `ws://${host}:3001`;
+      const ws = new WebSocket(socketUrl);
       wsRef.current = ws;
 
       ws.onopen = () => {
