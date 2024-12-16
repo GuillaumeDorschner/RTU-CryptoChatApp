@@ -58,7 +58,7 @@ function App() {
     if (storedUserId) {
       const newUser = {
         id: storedUserId,
-        name: storedUser.name || '',
+        name: storedUser.name || usernameInput.trim(),
         openChatId: storedUser.openChatId || null,
       };
 
@@ -82,11 +82,8 @@ function App() {
       const userId = uuidv4();
       document.cookie = `userId=${userId}; path=/`;
       const newUser = { id: userId, name: usernameInput.trim(), openChatId: null };
-      console.log('error 1');
       initializeWebSocket(userId);
-      console.log('error 2');
       initializeUser();
-      console.log('error 3');
       setUsernameInput('');
 
       // localStorage.setItem('chats', JSON.stringify([]));
