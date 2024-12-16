@@ -80,6 +80,9 @@ function App() {
       setUser(newUser);
       initializeWebSocket(userId);
       setUsernameInput('');
+
+      localStorage.setItem('chats', JSON.stringify([]));
+      localStorage.setItem('settings', JSON.stringify({ theme: 'light', open: false }));
     } else {
       console.warn('Username cannot be empty.');
     }
