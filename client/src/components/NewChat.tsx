@@ -47,8 +47,6 @@ const NewChat = () => {
     };
 
     setChats([...chats, newChat]);
-
-    console.log('chats: ', chats);
   };
   return (
     <div className="flex flex-col max-w-full p-4 mb-4 rounded-lg bg-bgCard">

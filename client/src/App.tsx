@@ -49,12 +49,10 @@ function App() {
       .split('; ')
       .find((row) => row.startsWith('userId='))
       ?.split('=')[1];
-    console.log('je ne passe pas:', storedUserId);
     const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
     const storedChats = localStorage.getItem('chats') || '[]';
     const storedSettings = JSON.parse(localStorage.getItem('settings') || '{}');
 
-    console.log('je ne passe pas');
     if (storedUserId) {
       const newUser = {
         id: storedUserId,
@@ -69,9 +67,7 @@ function App() {
 
       setUser(newUser);
       setChats(JSON.parse(storedChats));
-      console.log('Chat jshdgkjfhd:', storedChats);
       setSettings(newSettings);
-      console.log('Setting: sqdfjshdfj', newSettings);
       initializeWebSocket(storedUserId);
     }
     setIsLoading(false);
@@ -81,13 +77,9 @@ function App() {
     if (usernameInput.trim()) {
       const userId = uuidv4();
       document.cookie = `userId=${userId}; path=/`;
-      const newUser = { id: userId, name: usernameInput.trim(), openChatId: null };
       initializeWebSocket(userId);
       initializeUser();
       setUsernameInput('');
-
-      // localStorage.setItem('chats', JSON.stringify([]));
-      // localStorage.setItem('settings', JSON.stringify({ theme: 'light', open: false }));
     } else {
       console.warn('Username cannot be empty.');
     }
