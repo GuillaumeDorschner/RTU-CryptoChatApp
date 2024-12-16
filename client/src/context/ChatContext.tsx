@@ -104,23 +104,27 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
 
         const publicKey = message.publicKey;
         const name = message.senderName;
-        const chat = chats.find((chat) => chat.participantId === message.senderId);
 
-        const newChat = {
-          id: message.senderId,
-          name: name,
-          participantId: message.senderId,
-          cryptographie: {
-            AESkey: 'Two',
-            publicKey: 'jhfjkdsfh',
-            privateKey: 'kfhjdskjfh',
-          },
-          messages: [],
-        };
+        setChats((prevChats) =>
+          prevChats.map((chat) => {
+            if (chat.participantId === message.senderId) {
+              const privateKey = chat.cryptographie.privateKey;
 
-        console.log(name);
+              //TODO: calculate shared key otherPubicKey * privateKey
+              const derivedAESKey = 'Two';
 
-        setChats([...chats, newChat]);
+              return {
+                ...chat,
+                name: name || chat.name,
+                cryptographie: {
+                  ...chat.cryptographie,
+                  AESkey: derivedAESKey,
+                },
+              };
+            }
+            return chat;
+          }),
+        );
       }
 
       if (message.type === 'encryptedMessage') {
@@ -163,6 +167,12 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
       localStorage.setItem('settings', JSON.stringify(settings));
     }
   }, [settings]);
+
+  useEffect(() => {
+    console.log('User:', user);
+    console.log('Chats:', chats);
+    console.log('Settings', settings);
+  }, [user, chats, settings]);
 
   useEffect(() => {
     if (ws) {

@@ -49,24 +49,29 @@ function App() {
       .split('; ')
       .find((row) => row.startsWith('userId='))
       ?.split('=')[1];
+    console.log('je ne passe pas:', storedUserId);
     const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
     const storedChats = localStorage.getItem('chats');
     const storedSettings = JSON.parse(localStorage.getItem('settings') || '{}');
 
+    console.log('je ne passe pas');
     if (storedUserId) {
-      const user = {
+      const newUser = {
         id: storedUserId,
         name: storedUser.name || '',
         openChatId: storedUser.openChatId || null,
       };
 
-      console.log(storedChats);
-      setUser(user);
-      setChats(JSON.parse(storedChats));
-      setSettings({
+      const newSettings = {
         theme: storedSettings.theme || 'light',
         open: storedSettings.open || false,
-      });
+      };
+
+      setUser(newUser);
+      setChats(JSON.parse(storedChats));
+      console.log('Chat jshdgkjfhd:', storedChats);
+      setSettings(newSettings);
+      console.log('Setting: sqdfjshdfj', newSettings);
       initializeWebSocket(storedUserId);
     }
     setIsLoading(false);
