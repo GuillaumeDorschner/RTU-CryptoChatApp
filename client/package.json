@@ -3,8 +3,8 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "start": "vite --host --port 80",
-    "dev": "vite --host --port 80",
+    "start": "vite --host 0.0.0.0 --port 80",
+    "dev": "vite --host 0.0.0.0 --port 80",
     "test": "jest",
     "build": "tsc -b && vite build",
     "lint": "eslint .",

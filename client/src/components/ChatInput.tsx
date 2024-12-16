@@ -15,13 +15,18 @@ const ChatInput = () => {
         time: new Date(),
       };
 
-      const participantId = chats.find((chat) => chat.id === user.openChatId)?.participantId;
+      const chat = chats.find((chat) => chat.id === user.openChatId);
+
+      const participantId = chat?.participantId;
+      const sharedKey = chat?.cryptographie?.AESkey;
+
+      const encryptedMessage = newMessage.text; // TODO: Encrypt using sharedKey
 
       const data = {
         type: 'relayEncryptedMessage',
         senderId: user.id,
         recipientId: participantId,
-        encryptedMessage: newMessage.text, // TODO: Encrypt using AES
+        encryptedMessage: encryptedMessage,
       };
 
       ws?.send(JSON.stringify(data));
