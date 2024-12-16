@@ -13,6 +13,14 @@ const NewChat = () => {
     const randomPublic = Math.floor(Math.random() * 1000); // TODO: remove
     const randomPrivate = Math.floor(Math.random() * 1000); // TODO: remove
 
+    // fail alert user already in chat
+    const chatExists = chats.find((chat) => chat.participantId === newChatId);
+    if (chatExists) {
+      console.log('Chat already exists');
+      alert('Chat already exists');
+      return;
+    }
+
     const data = {
       type: 'relayPublicKey',
       keyType: 'publicKeyOne',
@@ -23,9 +31,6 @@ const NewChat = () => {
     };
 
     ws?.send(JSON.stringify(data));
-
-    // TODO fail alert user not found
-    // TODO fail alert user already in chat
 
     const newChat = {
       id: randomId,

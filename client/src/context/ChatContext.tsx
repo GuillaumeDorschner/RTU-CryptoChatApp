@@ -124,6 +124,22 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
 
       if (message.type === 'encryptedMessage') {
         console.log('encrypted message received', message);
+
+        const newMessage = {
+          text: message.encryptedMessage,
+          senderId: message.senderId,
+          time: new Date(),
+        };
+
+        const chat = chats.find((chat) => chat.participantId === message.senderId);
+
+        if (!chat) return;
+
+        setChats((prevChats) => {
+          return prevChats.map((c) =>
+            c.participantId === message.senderId ? { ...c, messages: [...c.messages, newMessage] } : c,
+          );
+        });
       }
     },
     [user],
