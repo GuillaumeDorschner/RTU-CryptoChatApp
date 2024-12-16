@@ -12,8 +12,8 @@ const NewChat = () => {
 
     const randomId = uuidv4();
     // TODO: key pair generation ECDH
-    const randomPublic = Math.floor(Math.random() * 1000); // TODO: remove
-    const randomPrivate = Math.floor(Math.random() * 1000); // TODO: remove
+    const publicKey = Math.floor(Math.random() * 1000); // TODO: remove
+    const privateKey = Math.floor(Math.random() * 1000); // TODO: remove
 
     // fail alert user already in chat
     const chatExists = chats.find((chat) => chat.participantId === newChatId);
@@ -28,7 +28,7 @@ const NewChat = () => {
       keyType: 'publicKeyOne',
       senderId: user?.id,
       recipientId: newChatId,
-      publicKey: randomPublic, // TODO: key pair generation ECDH
+      publicKey: publicKey,
       senderName: user?.name,
     };
 
@@ -40,8 +40,8 @@ const NewChat = () => {
       participantId: newChatId,
       cryptographie: {
         AESkey: '',
-        publicKey: randomPublic,
-        privateKey: randomPrivate,
+        publicKey: publicKey,
+        privateKey: privateKey,
       },
       messages: [],
     };
@@ -63,7 +63,8 @@ const NewChat = () => {
           if (e.key === 'Enter') handleNewChat();
         }}
       />
-      <p>my id: {user?.id})</p>
+      <p>Your ID:</p>
+      <p>{user?.id}</p>
     </div>
   );
 };
