@@ -59,8 +59,10 @@ function App() {
         name: storedUser.name || '',
         openChatId: storedUser.openChatId || null,
       };
+
+      console.log(storedChats);
       setUser(user);
-      setChats(storedChats ? JSON.parse(storedChats) : []);
+      setChats(JSON.parse(storedChats));
       setSettings({
         theme: storedSettings.theme || 'light',
         open: storedSettings.open || false,
@@ -89,9 +91,22 @@ function App() {
 
   useEffect(() => {
     console.log('User:', user);
+    if (user && setIsLoading) {
+      localStorage.setItem('User', JSON.stringify(user));
+    }
+  }, [user, isLoading]);
+  useEffect(() => {
     console.log('Chats:', chats);
+    if (chats && setIsLoading) {
+      localStorage.setItem('chats', JSON.stringify(chats));
+    }
+  }, [chats, isLoading]);
+  useEffect(() => {
     console.log('Settings', settings);
-  }, [user, chats, settings]);
+    if (settings && setIsLoading) {
+      localStorage.setItem('settings', JSON.stringify(settings));
+    }
+  }, [settings, isLoading]);
 
   if (isLoading) {
     return (

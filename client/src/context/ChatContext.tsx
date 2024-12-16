@@ -78,7 +78,7 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
           name: message.senderName,
           participantId: message.senderId,
           cryptographie: {
-            AESkey: '',
+            AESkey: 'One',
             publicKey: randomPublic,
             privateKey: randomPrivate,
           },
@@ -86,8 +86,6 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
         };
 
         setChats([...chats, newChat]);
-
-        console.log('chats: ', chats);
 
         const publicKey = message.publicKey;
         const chat = chats.find((chat) => chat.participantId === message.senderId);
@@ -107,26 +105,21 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
         const name = message.senderName;
         const chat = chats.find((chat) => chat.participantId === message.senderId);
 
-        if (!chat) return;
+        const newChat = {
+          id: message.senderId,
+          name: name,
+          participantId: message.senderId,
+          cryptographie: {
+            AESkey: 'Two',
+            publicKey: 'jhfjkdsfh',
+            privateKey: 'kfhjdskjfh',
+          },
+          messages: [],
+        };
 
-        const privateKey = chat.cryptographie.privateKey;
-        //TODO: calculate shared key otherPubicKey * privateKey
-        setChats(
-          chats.map((chat) =>
-            chat.participantId === message.senderId
-              ? {
-                  ...chat,
-                  cryptographie: {
-                    ...chat.cryptographie,
-                    AESkey: 'two', // sharedSecret(publicKey, privateKey),
-                  },
-                  name,
-                }
-              : chat,
-          ),
-        );
+        console.log(name);
 
-        console.log('chats: ', chat);
+        setChats([...chats, newChat]);
       }
 
       if (message.type === 'encryptedMessage') {
