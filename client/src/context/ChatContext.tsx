@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useMemo, ReactNode, useCallback, useEffect } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 type Message = {
   text: string;
@@ -7,10 +8,14 @@ type Message = {
 };
 
 type Chat = {
-  id: number;
+  id: string;
   name: string;
   participantId: string;
-  AESkey: string;
+  cryptographie: {
+    AESkey: string;
+    publicKey: string;
+    privateKey: string;
+  };
   messages: Message[];
 };
 
@@ -48,36 +53,126 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
     (event: MessageEvent) => {
       const message = JSON.parse(event.data);
 
-      // TODO: create a new chat i don't think this work
       if (message.type === 'publicKeyOne') {
         console.log('public key received', message);
 
-        console.log(user);
+        const randomId = uuidv4();
+        // TODO: key pair generation ECDH
+        const randomPublic = Math.floor(Math.random() * 1000); // TODO: remove
+        const randomPrivate = Math.floor(Math.random() * 1000); // TODO: remove
 
-        const newMessage = {
+        const data = {
           type: 'relayPublicKey',
           keyType: 'publicKeyTwo',
           senderId: user?.id,
           recipientId: message.senderId,
-          publicKey: 'heyydfskjfhsdkj 2',
+          publicKey: randomPublic,
           senderName: user?.name,
         };
 
-        ws?.send(JSON.stringify(newMessage));
+        ws?.send(JSON.stringify(data));
 
-        console.log('public key sent', newMessage);
+        console.log('public key sent', data);
+
+        const newChat = {
+          id: randomId,
+          name: message.senderName,
+          participantId: message.senderId,
+          cryptographie: {
+            AESkey: 'One',
+            publicKey: randomPublic,
+            privateKey: randomPrivate,
+          },
+          messages: [],
+        };
+
+        setChats([...chats, newChat]);
+
+        const publicKey = message.publicKey;
+        const chat = chats.find((chat) => chat.participantId === message.senderId);
+
+        if (!chat) return;
+
+        const privateKey = chat.cryptographie.privateKey;
+
+        //TODO: calculate shared key otherPubicKey * privateKey
+        chat.cryptographie.AESkey = 'one'; // sharedSecret(publicKey, privateKey);
       }
 
       if (message.type === 'publicKeyTwo') {
         console.log('public key received', message);
+
+        const publicKey = message.publicKey;
+        const name = message.senderName;
+
+        setChats((prevChats) =>
+          prevChats.map((chat) => {
+            if (chat.participantId === message.senderId) {
+              const privateKey = chat.cryptographie.privateKey;
+
+              //TODO: calculate shared key otherPubicKey * privateKey
+              const derivedAESKey = 'Two';
+
+              return {
+                ...chat,
+                name: name || chat.name,
+                cryptographie: {
+                  ...chat.cryptographie,
+                  AESkey: derivedAESKey,
+                },
+              };
+            }
+            return chat;
+          }),
+        );
       }
 
       if (message.type === 'encryptedMessage') {
         console.log('encrypted message received', message);
+
+        const newMessage = {
+          text: message.encryptedMessage,
+          senderId: message.senderId,
+          time: new Date(),
+        };
+
+        const chat = chats.find((chat) => chat.participantId === message.senderId);
+
+        if (!chat) return;
+
+        setChats((prevChats) => {
+          return prevChats.map((c) =>
+            c.participantId === message.senderId ? { ...c, messages: [...c.messages, newMessage] } : c,
+          );
+        });
       }
     },
-    [setChats, user],
+    [user],
   );
+
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (chats && chats.length > 0) {
+      localStorage.setItem('chats', JSON.stringify(chats));
+    }
+  }, [chats]);
+
+  useEffect(() => {
+    if (settings) {
+      localStorage.setItem('settings', JSON.stringify(settings));
+    }
+  }, [settings]);
+
+  useEffect(() => {
+    console.log('User:', user);
+    console.log('Chats:', chats);
+    console.log('Settings', settings);
+  }, [user, chats, settings]);
 
   useEffect(() => {
     if (ws) {

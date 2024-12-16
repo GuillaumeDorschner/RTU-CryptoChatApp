@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import ToggleDarkMode from './ToggleDarkMode';
 import { useChatContext } from '../context/ChatContext';
+import { v4 as uuidv4 } from 'uuid';
 
 const NewChat = () => {
   const { user, setUser, chats, setChats, ws } = useChatContext();
@@ -9,20 +10,43 @@ const NewChat = () => {
   const handleNewChat = async () => {
     if (newChatId.trim() === '') return;
 
+    const randomId = uuidv4();
+    // TODO: key pair generation ECDH
+    const randomPublic = Math.floor(Math.random() * 1000); // TODO: remove
+    const randomPrivate = Math.floor(Math.random() * 1000); // TODO: remove
+
+    // fail alert user already in chat
+    const chatExists = chats.find((chat) => chat.participantId === newChatId);
+    if (chatExists) {
+      console.log('Chat already exists');
+      alert('Chat already exists');
+      return;
+    }
+
     const data = {
       type: 'relayPublicKey',
       keyType: 'publicKeyOne',
       senderId: user?.id,
       recipientId: newChatId,
-      publicKey: 'heyydfskjfhsdkj 1', // TODO: ECDH
+      publicKey: randomPublic, // TODO: key pair generation ECDH
       senderName: user?.name,
     };
 
-    // TODO: Send request to server to create new chat
     ws?.send(JSON.stringify(data));
 
-    // TODO fail alert user not found
-    // TODO fail alert user already in chat
+    const newChat = {
+      id: randomId,
+      name: '',
+      participantId: newChatId,
+      cryptographie: {
+        AESkey: '',
+        publicKey: randomPublic,
+        privateKey: randomPrivate,
+      },
+      messages: [],
+    };
+
+    setChats([...chats, newChat]);
   };
   return (
     <div className="flex flex-col max-w-full p-4 mb-4 rounded-lg bg-bgCard">

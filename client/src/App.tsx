@@ -12,7 +12,7 @@ import ChatSettingsDrawer from './components/ChatSettingsDrawer';
 import { useChatContext } from './context/ChatContext';
 
 function App() {
-  const { user, setUser, chats, setChats, settings, setSettings, setWebSocket } = useChatContext();
+  const { user, setUser, setChats, settings, setSettings, setWebSocket } = useChatContext();
   const [usernameInput, setUsernameInput] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const wsRef = useRef<WebSocket | null>(null);
@@ -32,7 +32,7 @@ function App() {
       ws.onmessage = (event) => {
         const message = JSON.parse(event.data);
         console.log('Received WebSocket message:', message);
-        // Handle WebSocket messages in ChatContext
+        // Handle ChatContext
       };
 
       ws.onclose = () => {
@@ -50,21 +50,24 @@ function App() {
       .find((row) => row.startsWith('userId='))
       ?.split('=')[1];
     const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-    const storedChats = localStorage.getItem('chats');
+    const storedChats = localStorage.getItem('chats') || '[]';
     const storedSettings = JSON.parse(localStorage.getItem('settings') || '{}');
 
     if (storedUserId) {
-      const user = {
+      const newUser = {
         id: storedUserId,
-        name: storedUser.name || '',
+        name: storedUser.name || usernameInput.trim(),
         openChatId: storedUser.openChatId || null,
       };
-      setUser(user);
-      setChats(storedChats ? JSON.parse(storedChats) : []);
-      setSettings({
+
+      const newSettings = {
         theme: storedSettings.theme || 'light',
         open: storedSettings.open || false,
-      });
+      };
+
+      setUser(newUser);
+      setChats(JSON.parse(storedChats));
+      setSettings(newSettings);
       initializeWebSocket(storedUserId);
     }
     setIsLoading(false);
@@ -74,9 +77,8 @@ function App() {
     if (usernameInput.trim()) {
       const userId = uuidv4();
       document.cookie = `userId=${userId}; path=/`;
-      const newUser = { id: userId, name: usernameInput.trim(), openChatId: null };
-      setUser(newUser);
       initializeWebSocket(userId);
+      initializeUser();
       setUsernameInput('');
     } else {
       console.warn('Username cannot be empty.');

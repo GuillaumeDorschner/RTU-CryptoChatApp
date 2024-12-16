@@ -15,7 +15,7 @@ const Sidebar = () => {
             id={chat.id}
             name={chat.name}
             focus={chat.id === user?.openChatId}
-            lastMessage={chat.messages[chat.messages.length - 1].text}
+            lastMessage={chat.messages[chat.messages.length - 1]?.text}
           />
         ))}
       </div>
