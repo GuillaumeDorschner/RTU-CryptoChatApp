@@ -12,7 +12,7 @@ import ChatSettingsDrawer from './components/ChatSettingsDrawer';
 import { useChatContext } from './context/ChatContext';
 
 function App() {
-  const { user, setUser, chats, setChats, settings, setSettings, setWebSocket } = useChatContext();
+  const { user, setUser, setChats, settings, setSettings, setWebSocket } = useChatContext();
   const [usernameInput, setUsernameInput] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const wsRef = useRef<WebSocket | null>(null);
@@ -32,7 +32,7 @@ function App() {
       ws.onmessage = (event) => {
         const message = JSON.parse(event.data);
         console.log('Received WebSocket message:', message);
-        // Handle WebSocket messages in ChatContext
+        // Handle ChatContext
       };
 
       ws.onclose = () => {

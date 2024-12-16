@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import ToggleDarkMode from './ToggleDarkMode';
 import { useChatContext } from '../context/ChatContext';
+import { v4 as uuidv4 } from 'uuid';
 
 const NewChat = () => {
   const { user, setUser, chats, setChats, ws } = useChatContext();
@@ -9,7 +10,8 @@ const NewChat = () => {
   const handleNewChat = async () => {
     if (newChatId.trim() === '') return;
 
-    const randomId = Math.floor(Math.random() * 1000); // TODO: remove
+    const randomId = uuidv4();
+    // TODO: key pair generation ECDH
     const randomPublic = Math.floor(Math.random() * 1000); // TODO: remove
     const randomPrivate = Math.floor(Math.random() * 1000); // TODO: remove
 
@@ -26,7 +28,7 @@ const NewChat = () => {
       keyType: 'publicKeyOne',
       senderId: user?.id,
       recipientId: newChatId,
-      publicKey: randomPublic, // TODO: ECDH key pair
+      publicKey: randomPublic, // TODO: key pair generation ECDH
       senderName: user?.name,
     };
 

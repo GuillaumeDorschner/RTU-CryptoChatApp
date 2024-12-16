@@ -21,7 +21,7 @@ const ChatInput = () => {
         type: 'relayEncryptedMessage',
         senderId: user.id,
         recipientId: participantId,
-        encryptedMessage: newMessage.text, // TODO: Encrypt before sending
+        encryptedMessage: newMessage.text, // TODO: Encrypt using AES
       };
 
       ws?.send(JSON.stringify(data));

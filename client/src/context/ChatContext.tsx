@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useMemo, ReactNode, useCallback, useEffect } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 type Message = {
   text: string;
@@ -7,7 +8,7 @@ type Message = {
 };
 
 type Chat = {
-  id: number;
+  id: string;
   name: string;
   participantId: string;
   cryptographie: {
@@ -55,8 +56,8 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
       if (message.type === 'publicKeyOne') {
         console.log('public key received', message);
 
-        // TODO: use ecdh
-        const randomId = Math.floor(Math.random() * 1000); // TODO: remove
+        const randomId = uuidv4();
+        // TODO: key pair generation ECDH
         const randomPublic = Math.floor(Math.random() * 1000); // TODO: remove
         const randomPrivate = Math.floor(Math.random() * 1000); // TODO: remove
 
