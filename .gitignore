@@ -188,3 +188,7 @@ thumb
 sketch
 
 # End of https://www.toptal.com/developers/gitignore/api/node,react,macos
+client/src/CryptoAlgs/ECC/tsconfig.json
+client/src/CryptoAlgs/ECC/workSheet.ts
+client/src/CryptoAlgs/testMain.ts
+client/src/CryptoAlgs/testMain.ts
