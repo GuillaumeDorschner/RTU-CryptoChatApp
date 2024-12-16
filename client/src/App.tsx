@@ -51,7 +51,7 @@ function App() {
       ?.split('=')[1];
     console.log('je ne passe pas:', storedUserId);
     const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-    const storedChats = localStorage.getItem('chats');
+    const storedChats = localStorage.getItem('chats') || '[]';
     const storedSettings = JSON.parse(localStorage.getItem('settings') || '{}');
 
     console.log('je ne passe pas');
@@ -82,12 +82,15 @@ function App() {
       const userId = uuidv4();
       document.cookie = `userId=${userId}; path=/`;
       const newUser = { id: userId, name: usernameInput.trim(), openChatId: null };
-      setUser(newUser);
+      console.log('error 1');
       initializeWebSocket(userId);
+      console.log('error 2');
+      initializeUser();
+      console.log('error 3');
       setUsernameInput('');
 
-      localStorage.setItem('chats', JSON.stringify([]));
-      localStorage.setItem('settings', JSON.stringify({ theme: 'light', open: false }));
+      // localStorage.setItem('chats', JSON.stringify([]));
+      // localStorage.setItem('settings', JSON.stringify({ theme: 'light', open: false }));
     } else {
       console.warn('Username cannot be empty.');
     }
