@@ -1,18 +1,9 @@
-import { ECDH, KeyPair } from './ECDH/ECDH';
-function testECDH() {
-  console.log('Generating key pairs for Alice and Bob...');
+import { ECC } from './ECC/ecc';
 
-  const aliceKeyPair: KeyPair = ECDH.generateKeyPair('curve25519');
-  console.log('Alice Key Pair:', aliceKeyPair);
+const ecc = new ECC()
 
-  const bobKeyPair: KeyPair = ECDH.generateKeyPair('curve25519');
-  console.log('Bob Key Pair:', bobKeyPair);
 
-  const aliceSharedSecret = ECDH.computeSharedSecret(aliceKeyPair.privateKey, bobKeyPair.publicKey);
-  console.log('Alice Shared Secret:', aliceSharedSecret);
+console.log("private:"+ecc.sk)
+console.log("public x:"+ecc.pk.x)
+console.log("public y:"+ecc.pk.y)
 
-  const bobSharedSecret = ECDH.computeSharedSecret(bobKeyPair.privateKey, aliceKeyPair.publicKey);
-  console.log('Bob Shared Secret:', bobSharedSecret);
-}
-
-testECDH();

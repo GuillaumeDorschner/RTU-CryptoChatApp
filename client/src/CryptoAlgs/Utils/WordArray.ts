@@ -106,7 +106,7 @@ export class WordArray implements WordArray {
         return new WordArray(newWords, this.nbBytes)
     }
 
-    public static random(nBytes: number) {
+    static random(nBytes: number): WordArray {
 
         const r = (function(m_w: number) {
             let m_z = 0x3ade68b1;
@@ -139,6 +139,17 @@ export class WordArray implements WordArray {
         return new WordArray(this.words.slice(0), this.nbBytes);
     }
 
+    static stringifyLatin1(wordArray: WordArray): string {
+        // Convert
+        const latin1Chars = [];
+        for (let i = 0; i < wordArray.nbBytes; i++) {
+            const bite = (wordArray.words[i >>> 2] >>> (24 - (i % 4) * 8)) & 0xff;
+            latin1Chars.push(String.fromCharCode(bite));
+        }
+
+        return latin1Chars.join('');
+    }
+
     static latin1StringToWordArray(latin1Str: string): WordArray {
         // Shortcut
         const latin1StrLength = latin1Str.length;
@@ -156,7 +167,7 @@ export class WordArray implements WordArray {
 
     public static stringifyUtf8(wordArray: WordArray): string {
         try {
-            return decodeURIComponent(escape(Latin1.stringify(wordArray)));
+            return decodeURIComponent(escape(this.stringifyLatin1(wordArray)));
         } catch(e) {
             throw new Error('Malformed UTF-8 data');
         }
