@@ -1,5 +1,5 @@
 import http from 'http';
-import app from './app';
+import app from './api';
 import { startWebSocketServer } from './ws';
 
 const PORT = 3000;
