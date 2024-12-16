@@ -130,6 +130,24 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
   );
 
   useEffect(() => {
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (chats && chats.length > 0) {
+      localStorage.setItem('chats', JSON.stringify(chats));
+    }
+  }, [chats]);
+
+  useEffect(() => {
+    if (settings) {
+      localStorage.setItem('settings', JSON.stringify(settings));
+    }
+  }, [settings]);
+
+  useEffect(() => {
     if (ws) {
       ws.onmessage = handleWebSocketMessage;
     }

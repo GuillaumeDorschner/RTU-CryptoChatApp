@@ -89,25 +89,6 @@ function App() {
     initializeUser();
   }, []);
 
-  useEffect(() => {
-    console.log('User:', user);
-    if (user && setIsLoading) {
-      localStorage.setItem('User', JSON.stringify(user));
-    }
-  }, [user, isLoading]);
-  useEffect(() => {
-    console.log('Chats:', chats);
-    if (chats && setIsLoading) {
-      localStorage.setItem('chats', JSON.stringify(chats));
-    }
-  }, [chats, isLoading]);
-  useEffect(() => {
-    console.log('Settings', settings);
-    if (settings && setIsLoading) {
-      localStorage.setItem('settings', JSON.stringify(settings));
-    }
-  }, [settings, isLoading]);
-
   if (isLoading) {
     return (
       <div className="h-screen w-full flex justify-center items-center bg-bgGlobal text-text">
