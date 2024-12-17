@@ -160,7 +160,8 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
         const sharedKey: string = getOrThrowStr(chat?.cryptographie.AESkey);
         console.log('sharedKey 3: ' + sharedKey);
         console.log('Encrypted message: ' + message.encryptedMessage);
-        const salt = new WordArray([-939201693, 719097864], 8); //TODO: Retrieve slat from message
+        const salt = message.salt;
+        console.log('Salt: ' + salt);
         const decryptedMessage: string = new AESImpl()
           .init(getOrThrowStr(sharedKey), getByteLengthUtf16(sharedKey), aesConstants, salt)
           .decryptMessage(WordArray.parseBase64(message.encryptedMessage), aesConstants);

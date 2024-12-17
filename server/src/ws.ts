@@ -1,5 +1,6 @@
 import { WebSocketServer } from 'ws';
 import type { WebSocket } from 'ws';
+import { WordArray } from '../../client/src/CryptoAlgs/Utils/WordArray';
 
 type Message =
   | { type: 'connect'; userId: string }
@@ -11,11 +12,11 @@ type Message =
       publicKey: string;
       senderName: string;
     }
-  | { type: 'relayEncryptedMessage'; senderId: string; recipientId: string; encryptedMessage: string };
+  | { type: 'relayEncryptedMessage'; senderId: string; recipientId: string; encryptedMessage: string; salt: WordArray };
 
 type Response =
   | { type: 'publicKeyOne' | 'publicKeyTwo'; senderId: string; publicKey: string; senderName: string }
-  | { type: 'encryptedMessage'; senderId: string; encryptedMessage: string };
+  | { type: 'encryptedMessage'; senderId: string; encryptedMessage: string; salt: WordArray };
 
 const clients: Map<string, WebSocket> = new Map();
 
@@ -61,9 +62,9 @@ export const startWebSocketServer = (port: number) => {
           }
 
           case 'relayEncryptedMessage': {
-            const { senderId, recipientId, encryptedMessage } = message;
+            const { senderId, recipientId, encryptedMessage, salt } = message;
             console.log(`Relaying message from ${senderId} to ${recipientId}`);
-            sendToClient(recipientId, { type: 'encryptedMessage', senderId, encryptedMessage });
+            sendToClient(recipientId, { type: 'encryptedMessage', senderId, encryptedMessage, salt });
             break;
           }
 
