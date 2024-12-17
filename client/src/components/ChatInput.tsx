@@ -2,6 +2,26 @@ import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPaperPlane } from '@fortawesome/free-solid-svg-icons';
 import { useChatContext } from '../context/ChatContext';
+import { AESImpl } from '../CryptoAlgs/AES/AES';
+import { aesConstants } from '../CryptoAlgs/AES/AESConstants';
+import { WordArray } from '../CryptoAlgs/Utils/WordArray';
+
+const aes = (new AESImpl())
+
+function getOrThrowStr(input:string|undefined): string{
+  if(typeof input === 'string'){
+    return input
+  }
+  throw new Error("string was undefined")
+}
+
+function getByteLengthUtf16(input: string): number {
+  let byteLength = 0;
+  for (const char of input) {
+    byteLength += char.charCodeAt(0) > 0xffff ? 4 : 2;
+  }
+  return byteLength;
+}
 
 const ChatInput = () => {
   const { user, chats, setChats, ws } = useChatContext();
@@ -15,12 +35,18 @@ const ChatInput = () => {
         time: new Date(),
       };
 
+
       const chat = chats.find((chat) => chat.id === user.openChatId);
 
       const participantId = chat?.participantId;
       const sharedKey = chat?.cryptographie?.AESkey;
+      const salt = new WordArray([-939201693,719097864], 8) //TODO: Send with message
+      aes.init(getOrThrowStr(sharedKey), getByteLengthUtf16(getOrThrowStr(sharedKey)), aesConstants, salt) 
+      console.log("shared key 4: "+ sharedKey)
 
-      const encryptedMessage = newMessage.text; // TODO: Encrypt using sharedKey
+
+      const encryptedMessage: string = WordArray.stringifyBase64(aes.encryptMessage(messageInput.trim(), aesConstants));
+      console.log("Encrypted message source: "+ encryptedMessage)
 
       const data = {
         type: 'relayEncryptedMessage',

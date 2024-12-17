@@ -1,5 +1,5 @@
 
-import { inverseOf, mod, toBinary } from "./utils";
+import { hex2Int, inverseOf, mod, toBinary } from "./utils";
 import { Curve } from "./curve";
 
 export class Point {
@@ -45,7 +45,7 @@ export class Point {
   // See: https://andrea.corbellini.name/2015/05/17/elliptic-curve-cryptography-a-gentle-introduction#algebraic-addition
   // See: https://andrea.corbellini.name/2015/05/23/elliptic-curve-cryptography-finite-fields-and-discrete-logarithms#algebraic-sum
   double(): Point {
-    // assert(this.isOnCurve());
+    this.isOnCurve();
 
     const x1 = this.x;
     const y1 = this.y;
@@ -69,8 +69,8 @@ export class Point {
   // See: https://andrea.corbellini.name/2015/05/17/elliptic-curve-cryptography-a-gentle-introduction#algebraic-addition
   // See: https://andrea.corbellini.name/2015/05/23/elliptic-curve-cryptography-finite-fields-and-discrete-logarithms#algebraic-sum
   add(other: Point): Point {
-    // assert(this.isOnCurve());
-    // assert(other.isOnCurve());
+    this.isOnCurve();
+    other.isOnCurve();
 
     const x1 = this.x;
     const x2 = other.x;
@@ -110,7 +110,7 @@ export class Point {
   }
 
   scalarMul(k: bigint): Point {
-    // assert(this.isOnCurve());
+    this.isOnCurve();
 
     // Double-and-add.
     const bits = toBinary(k);
@@ -124,10 +124,20 @@ export class Point {
         total = total.add(addend);
       }
       addend = addend.double();
+      //console.log("bit: "+bit+", total x: "+total.x+ ", total y: "+total.y)
     }
 
-    // assert(total.isOnCurve());
-
+    total.isOnCurve();
     return total;
+  }
+
+  static publicKeyToPoint(publicKeyHex: string, curve: Curve): Point {
+    const xHex = publicKeyHex.slice(4, 68); // Next 64 hex characters (32 bytes)
+    const x = hex2Int(xHex);
+  
+    // Uncompressed format: extract x and y
+    const yHex = publicKeyHex.slice(68); // Remaining 64 hex characters (32 bytes)
+    const y = hex2Int(yHex);
+    return new Point(curve, x, y);
   }
 }

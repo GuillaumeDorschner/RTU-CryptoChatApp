@@ -86,6 +86,17 @@ export function int2Hex(number: bigint, prefix = true, pad = true) {
   return result;
 }
 
+export function hex2Int(hex: string) {
+  
+  if (hex.startsWith("0x")) {
+    hex = hex.slice(2);
+  }
+
+  const result = fromBigEndian(hex2buf(hex));
+
+  return result;
+}
+
 // See: https://stackoverflow.com/a/40031979
 export function buf2hex(buffer: Uint8Array, prefix = true) {
   const result = [...new Uint8Array(buffer)]
@@ -97,6 +108,27 @@ export function buf2hex(buffer: Uint8Array, prefix = true) {
   }
 
   return result;
+}
+
+// See: https://stackoverflow.com/a/40031979
+export function hex2buf(hex: string): Uint8Array {
+  // Remove optional "0x" prefix if present
+  if (hex.startsWith("0x")) {
+    hex = hex.slice(2);
+  }
+
+  // Ensure the hex string has an even length
+  if (hex.length % 2 !== 0) {
+    throw new Error("Invalid hex string: must have an even length.");
+  }
+
+  // Convert each pair of hex characters into a byte
+  const byteArray = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < hex.length; i += 2) {
+    byteArray[i / 2] = parseInt(hex.slice(i, i + 2), 16);
+  }
+
+  return byteArray;
 }
 
 // See: https://stackoverflow.com/a/56943145
@@ -118,3 +150,20 @@ export function int2BytesLe(int: bigint, padding = 32) {
 
   return result;
 }
+
+export function fromLittleEndian(bytes: Uint8Array) {
+  let result = 0n
+  let base = 1n
+  bytes.forEach(function (byte) {
+      result += base * BigInt(byte);
+      base = base * 256n;
+  });
+  return result;
+}
+
+export function fromBigEndian(bytes: Uint8Array) {
+  return fromLittleEndian(bytes.reverse());
+}
+
+
+
