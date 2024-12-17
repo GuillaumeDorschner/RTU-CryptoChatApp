@@ -1,3 +1,4 @@
+import { NumberArrayToBinary } from "../Utils/printFormat";
 import { WordArray } from "../Utils/WordArray";
 import { Md5 } from "ts-md5";
 
@@ -18,10 +19,13 @@ export class KeyIVUtils {
         if(prevBlock.length>0) {
             hasher.start().appendByteArray(new Uint8Array(prevBlock));
         }
+
         const block: number[] = this.narrowToNbArr(hasher.appendByteArray(new Uint8Array(password.words))
             .appendByteArray(new Uint8Array(salt.words))
             .end(true));
-
+        //console.log("password: "+ password.words)
+        //console.log("salt: "+ salt.words)
+        //console.log("block hash: "+ block)
         // Iterations
         let blockIterate = block;
         for(let i = 1; i < iterations; i++) {
@@ -38,19 +42,17 @@ export class KeyIVUtils {
     computeDerivedKey(password: WordArray, salt: WordArray, keySize: number, iterations: number): WordArray {
         // Init hasher²
         const hasher = new Md5();
-
         // Initial values
         const derivedKey = this.computeDerivedKeyRecurse(hasher, password, salt, iterations, keySize)
 
         return new WordArray(derivedKey.words, keySize*4);
     }
 
-    computeDerivedKeyAndIV(passwordUtf8: string, keySize: number, ivSize: number): {key:WordArray, iv:WordArray, salt:WordArray} {
-        // Generate random salt
-        const salt = WordArray.random(64 / 8);
+    computeDerivedKeyAndIV(passwordUtf8: string, keySize: number, ivSize: number, salt: WordArray): {key:WordArray, iv:WordArray, salt:WordArray} {
+        
 
         const passwordWa = WordArray.utf8StringToWordArray(passwordUtf8)
-
+        //console.log("passwordWA: "+passwordWa.words)
         // Derive key and IV
         const key = this.computeDerivedKey(passwordWa, salt, keySize+ivSize, 1);
 

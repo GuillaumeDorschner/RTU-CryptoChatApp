@@ -15,12 +15,17 @@ export class AESImpl {
     _iv!: WordArray;
     _keySchedule!: Array<number>;
     _invKeySchedule!: Array<number>;
+    _salt!: WordArray
 
 
     readonly paddingPKCS7: PKCS7Impl = (new PKCS7Impl)
 
-    init(passwordUtf8: string, keySize: number, aesConstants: AESConstants) {
-        const keyAndIV = (new KeyIVUtils).computeDerivedKeyAndIV(passwordUtf8, keySize, 4)
+    init(passwordUtf8: string, keySize: number, aesConstants: AESConstants, salt?:WordArray): AESImpl {
+        if(!salt){
+            salt = WordArray.random(64 / 8);
+        }
+        this._salt = salt
+        const keyAndIV = (new KeyIVUtils).computeDerivedKeyAndIV(passwordUtf8, keySize, 4, salt)
         //const key = new WordArray([
         //    653745428,
         //    -162117686,
@@ -37,6 +42,7 @@ export class AESImpl {
         //  ], 32)
         this._iv = keyAndIV.iv //new WordArray( [-2091216879,-2003306387,-222491591,-1023359112,], 16)//
         this.updateState(keyAndIV.key, aesConstants)
+        return this
     }
 
     updateState(key: WordArray, aesConstants: AESConstants): {key: WordArray, keySchedule: number[], ikeySchedule: number[]} {
@@ -218,9 +224,9 @@ export class AESImpl {
 
     encryptBlock(block: number[], prevBlockOrIv: number[], aesConstants: AESConstants): {prevBlock:number[], rslt:number[]} {
         const xoredBlock = this.xorBlock(block, prevBlockOrIv)
-        console.log("xoredBlock: "+NumberArrayToBinary(xoredBlock) )
+        //console.log("xoredBlock: "+NumberArrayToBinary(xoredBlock) )
         const cypherText = this.cryptBlock(xoredBlock, this._keySchedule, [aesConstants.subMix0, aesConstants.subMix1, aesConstants.subMix2, aesConstants.subMix3], aesConstants.sbox)
-        console.log("cypherText: "+NumberArrayToBinary(cypherText) )
+        //console.log("cypherText: "+NumberArrayToBinary(cypherText) )
         return {prevBlock:cypherText, rslt:cypherText}
     }
     
@@ -228,13 +234,13 @@ export class AESImpl {
 
 
         const newBlock = [block[0], block[3], block[2], block[1]]
-        console.log("newBlock: "+NumberArrayToBinary(newBlock) )
+        //console.log("newBlock: "+NumberArrayToBinary(newBlock) )
 
         const deciphered = this.cryptBlock(newBlock, this._invKeySchedule, [aesConstants.invSubMix0, aesConstants.invSubMix1, aesConstants.invSubMix2, aesConstants.invSubMix3], aesConstants.invSBox)
-        console.log("deciphered: "+NumberArrayToBinary(deciphered) )
+        //console.log("deciphered: "+NumberArrayToBinary(deciphered) )
 
         const swappedAgain = [deciphered[0], deciphered[3], deciphered[2], deciphered[1]]
-        console.log("swappedAgain: "+NumberArrayToBinary(swappedAgain) )
+        //console.log("swappedAgain: "+NumberArrayToBinary(swappedAgain) )
 
         const xoredBlock = this.xorBlock(swappedAgain, prevBlockOrIv)
 
@@ -276,11 +282,11 @@ export class AESImpl {
 
     encryptMessage(message: string, aesConstants: AESConstants): WordArray {
         const waMessage: WordArray= WordArray.utf8StringToWordArray(message)
-        console.log("waMessage: "+NumberArrayToBinary(waMessage.words) )
+        //console.log("waMessage: "+NumberArrayToBinary(waMessage.words) )
         const padded: WordArray= this.paddingPKCS7.pad(waMessage, 16)
-        console.log("padded: "+NumberArrayToBinary(padded.words) )
+        //console.log("padded: "+NumberArrayToBinary(padded.words) )
         const processed: WordArray = this.process(padded, aesConstants, this.encryptBlock.bind(this))
-        console.log("processed: "+NumberArrayToBinary(waMessage.words) )
+        //console.log("processed: "+NumberArrayToBinary(waMessage.words) )
         return processed
     }
 
