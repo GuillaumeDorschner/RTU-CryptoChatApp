@@ -1,11 +1,11 @@
 <div style="display: flex; justify-content: center; align-items: center; width: 500px; margin: 0 auto;">
-    <img src="./img/guillaume.png" height=100 style="align-self: center;">
+    <img src="./media/guillaume.png" height=100 style="align-self: center;">
     <img alt="image" src="https://avatars.githubusercontent.com/u/98171103?v=4" height=100 style="align-self: center;">
     <div style="padding: 20px; text-align: center;">
         <h3 style="font-size: 16px;">CryptoChatApp</h3>
         <h3 style="font-size: 16px;">Guillaume Dorschner & Quentin Le Nestour</h3>
     </div>
-    <img src="./img/rtu_logo.jpg" width="100" style="align-self: center;">
+    <img src="./media/rtu_logo.jpg" width="100" style="align-self: center;">
 </div>
 
 # Introduction
@@ -14,7 +14,7 @@ CryptoChatApp is a messaging application demonstrating cryptographic principles 
 
 ## Demo
 
-![CryptoChatApp Demo](https://example.com/demo.gif)
+https://github.com/user-attachments/assets/030e0651-afa6-4739-94a4-dfedb1d3bc23
 
 ## Getting Started
 
