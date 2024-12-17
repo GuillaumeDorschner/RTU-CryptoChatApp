@@ -14,7 +14,7 @@ CryptoChatApp is a messaging application demonstrating cryptographic principles 
 
 ## Demo
 
-https://github.com/user-attachments/assets/030e0651-afa6-4739-94a4-dfedb1d3bc23
+https://github.com/user-attachments/assets/1ea298e5-6403-4452-939a-d67e44c83431
 
 ## Getting Started
 
