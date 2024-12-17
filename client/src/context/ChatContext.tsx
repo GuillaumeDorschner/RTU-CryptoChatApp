@@ -49,11 +49,11 @@ type ChatContextType = {
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
-function getOrThrowStr(input:string|undefined): string{
-  if(typeof input === 'string'){
-    return input
+function getOrThrowStr(input: string | undefined): string {
+  if (typeof input === 'string') {
+    return input;
   }
-  throw new Error("string was undefined")
+  throw new Error('string was undefined');
 }
 
 function getByteLengthUtf16(input: string): number {
@@ -63,7 +63,6 @@ function getByteLengthUtf16(input: string): number {
   }
   return byteLength;
 }
-
 
 export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -80,17 +79,18 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
 
         const randomId = uuidv4();
 
-        const ecc = new ECC()
+        const ecc = new ECC();
 
         const ownPublicKey: string = ecc.getPublicKey();
-        const ownPrivateKey:  string  = ecc.sk.toString();
+        const ownPrivateKey: string = ecc.sk.toString();
         const remotePublicKey = message.publicKey;
 
-        console.log("Remote pk: "+ remotePublicKey)
-        const sharedKey: string = Point.publicKeyToPoint(remotePublicKey, new Secp256k1()).scalarMul(ecc.sk).x.toString();
-        
-        console.log("Shared key: "+ sharedKey)
+        console.log('Remote pk: ' + remotePublicKey);
+        const sharedKey: string = Point.publicKeyToPoint(remotePublicKey, new Secp256k1())
+          .scalarMul(ecc.sk)
+          .x.toString();
 
+        console.log('Shared key: ' + sharedKey);
 
         const data = {
           type: 'relayPublicKey',
@@ -104,25 +104,22 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
         ws?.send(JSON.stringify(data));
 
         console.log('public key sent', data);
-        console.log("Private key type:" + typeof ownPrivateKey)
+        console.log('Private key type:' + typeof ownPrivateKey);
 
-        const newChat = {
-          id: randomId,
-          name: message.senderName,
-          participantId: message.senderId,
-          cryptographie: {
-            AESkey: sharedKey,
-            publicKey: ownPublicKey,
-            privateKey: ownPrivateKey,
+        setChats((prevChats) => [
+          ...prevChats,
+          {
+            id: randomId,
+            name: message.senderName,
+            participantId: message.senderId,
+            cryptographie: {
+              AESkey: sharedKey,
+              publicKey: ownPublicKey,
+              privateKey: ownPrivateKey,
+            },
+            messages: [],
           },
-          messages: [],
-        };
-
-        setChats([...chats, newChat]);
-
-        const chat = chats.find((chat) => chat.participantId === message.senderId);
-
-        if (!chat) return;
+        ]);
       }
 
       if (message.type === 'publicKeyTwo') {
@@ -134,11 +131,13 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
         setChats((prevChats) =>
           prevChats.map((chat) => {
             if (chat.participantId === message.senderId) {
-              const ownPrivateKey: string =chat.cryptographie.privateKey;
+              const ownPrivateKey: string = chat.cryptographie.privateKey;
 
-              console.log("ownPrivateKey: "+ ownPrivateKey)
-              const sharedKey: string = Point.publicKeyToPoint(remotePublicKey, new Secp256k1()).scalarMul(BigInt(ownPrivateKey)).x.toString();
-              console.log("shared Key 2: "+ sharedKey)
+              console.log('ownPrivateKey: ' + ownPrivateKey);
+              const sharedKey: string = Point.publicKeyToPoint(remotePublicKey, new Secp256k1())
+                .scalarMul(BigInt(ownPrivateKey))
+                .x.toString();
+              console.log('shared Key 2: ' + sharedKey);
 
               return {
                 ...chat,
@@ -158,15 +157,14 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
         console.log('encrypted message received', message);
         const chat = chats.find((chat) => chat.participantId === message.senderId);
 
-        const sharedKey: string  = getOrThrowStr(chat?.cryptographie.AESkey);
-        console.log("sharedKey 3: "+sharedKey)
-        console.log("Encrypted message: "+ message.encryptedMessage)
-      const salt = new WordArray([-939201693,719097864], 8) //TODO: Retrieve slat from message
-        const decryptedMessage: string = (new AESImpl())
+        const sharedKey: string = getOrThrowStr(chat?.cryptographie.AESkey);
+        console.log('sharedKey 3: ' + sharedKey);
+        console.log('Encrypted message: ' + message.encryptedMessage);
+        const salt = new WordArray([-939201693, 719097864], 8); //TODO: Retrieve slat from message
+        const decryptedMessage: string = new AESImpl()
           .init(getOrThrowStr(sharedKey), getByteLengthUtf16(sharedKey), aesConstants, salt)
-          .decryptMessage(WordArray.parseBase64(message.encryptedMessage), aesConstants); 
-        console.log("Decrypted message: "+ decryptedMessage)
-        
+          .decryptMessage(WordArray.parseBase64(message.encryptedMessage), aesConstants);
+        console.log('Decrypted message: ' + decryptedMessage);
 
         const newMessage = {
           text: decryptedMessage,
@@ -194,12 +192,15 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (chats && chats.length > 0) {
-      console.log("chats:"+chats)
-      localStorage.setItem('chats', JSON.stringify(chats, (key, value) => {
-        value = key=="privateKey" ? value.toString() : value;
-        console.log(key, value, typeof value);
-        return value;
-      }));
+      console.log('chats:' + chats);
+      localStorage.setItem(
+        'chats',
+        JSON.stringify(chats, (key, value) => {
+          value = key == 'privateKey' ? value.toString() : value;
+          console.log(key, value, typeof value);
+          return value;
+        }),
+      );
     }
   }, [chats]);
 
