@@ -2,6 +2,7 @@ import { useState } from 'react';
 import ToggleDarkMode from './ToggleDarkMode';
 import { useChatContext } from '../context/ChatContext';
 import { v4 as uuidv4 } from 'uuid';
+import { ECC } from '../CryptoAlgs/ECC/ecc';
 
 const NewChat = () => {
   const { user, setUser, chats, setChats, ws } = useChatContext();
@@ -11,9 +12,11 @@ const NewChat = () => {
     if (newChatId.trim() === '') return;
 
     const randomId = uuidv4();
-    // TODO: key pair generation ECDH
-    const publicKey = Math.floor(Math.random() * 1000); // TODO: remove
-    const privateKey = Math.floor(Math.random() * 1000); // TODO: remove
+
+    const ecc = (new ECC())
+
+    const publicKey = ecc.getPublicKey();
+    const privateKey = ecc.sk;
 
     // fail alert user already in chat
     const chatExists = chats.find((chat) => chat.participantId === newChatId);

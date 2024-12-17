@@ -139,7 +139,7 @@ export class WordArray implements WordArray {
         try {
             return decodeURIComponent(escape(this.stringifyLatin1(wordArray)));
         } catch(e) {
-            throw new Error('Malformed UTF-8 data');
+            throw new Error('Malformed UTF-8 data, error:'+e);
         }
     }
 
@@ -147,5 +147,112 @@ export class WordArray implements WordArray {
         return this.latin1StringToWordArray(unescape(encodeURIComponent(utf8Str)));
     }
     
+    static base64ToWordArray(base64: string): WordArray {
+        const base64Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+        const paddingChar = '=';
+      
+        // Step 1: Decode the Base64 string into a byte array (Uint8Array)
+        let bytes: number[] = [];
+        let padding = 0;
+      
+        // Remove padding and decode base64 string to bytes
+        base64 = base64.replace(/[^A-Za-z0-9+\/]/g, ''); // Remove non-base64 characters
+        padding = base64.endsWith(paddingChar) ? (base64.endsWith('==') ? 2 : 1) : 0;
+      
+        // Decode Base64 to bytes
+        for (let i = 0; i < base64.length; i += 4) {
+          const chunk = base64.slice(i, i + 4);
+          const byte1 = base64Chars.indexOf(chunk[0]);
+          const byte2 = base64Chars.indexOf(chunk[1]);
+          const byte3 = base64Chars.indexOf(chunk[2]);
+          const byte4 = base64Chars.indexOf(chunk[3]);
+      
+          bytes.push((byte1 << 2) | (byte2 >> 4));
+          if (chunk[2] !== paddingChar) bytes.push(((byte2 & 0x0f) << 4) | (byte3 >> 2));
+          if (chunk[3] !== paddingChar) bytes.push(((byte3 & 0x03) << 6) | byte4);
+        }
+      
+        // Step 2: Convert the byte array into a WordArray
+        const wordArray: number[] = [];
+        for (let i = 0; i < bytes.length; i += 4) {
+          const word = (bytes[i] << 24) | (bytes[i + 1] << 16) | (bytes[i + 2] << 8) | bytes[i + 3];
+          wordArray.push(word);
+        }
+      
+        // The number of significant bytes
+        const sigBytes = bytes.length;
+      
+        return new WordArray(wordArray, sigBytes);
+      }      
+
+    static _map = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
+    public static stringifyBase64(wordArray: WordArray): string {
+        // Clamp excess bits
+        wordArray.clamp();
+ 
+        // Convert
+        const base64Chars = [];
+        for (let i = 0; i < wordArray.nbBytes; i += 3) {
+            const byte1 = (wordArray.words[i >>> 2]       >>> (24 - (i % 4) * 8))       & 0xff;
+            const byte2 = (wordArray.words[(i + 1) >>> 2] >>> (24 - ((i + 1) % 4) * 8)) & 0xff;
+            const byte3 = (wordArray.words[(i + 2) >>> 2] >>> (24 - ((i + 2) % 4) * 8)) & 0xff;
+
+            const triplet = (byte1 << 16) | (byte2 << 8) | byte3;
+
+            for (let j = 0; (j < 4) && (i + j * 0.75 < wordArray.nbBytes); j++) {
+                base64Chars.push(this._map.charAt((triplet >>> (6 * (3 - j))) & 0x3f));
+            }
+        }
+
+        // Add padding
+        const paddingChar = this._map.charAt(64);
+        if (paddingChar) {
+            while (base64Chars.length % 4) {
+                base64Chars.push(paddingChar);
+            }
+        }
+
+        return base64Chars.join('');
+    }
+
+    static _reverseMap: number[]|undefined
+    static parseBase64(base64Str: string): WordArray {
+        // Shortcuts
+        let base64StrLength = base64Str.length;
+        
+        if(this._reverseMap === undefined) {
+                this._reverseMap = [];
+                for(let j = 0; j < this._map.length; j++) {
+                    this._reverseMap[this._map.charCodeAt(j)] = j;
+                }
+        }
+
+        // Ignore padding
+        const paddingChar = this._map.charAt(64);
+        if(paddingChar) {
+            const paddingIndex = base64Str.indexOf(paddingChar);
+            if(paddingIndex !== -1) {
+                base64StrLength = paddingIndex;
+            }
+        }
+
+        // Convert
+        return this.parseLoop(base64Str, base64StrLength, this._reverseMap);
+    }
+
+    public static parseLoop(base64Str: string, base64StrLength: number, reverseMap: Array<number>): WordArray {
+        const words: Array<number> = [];
+        let nBytes = 0;
+        for(let i = 0; i < base64StrLength; i++) {
+            if(i % 4) {
+                const bits1 = reverseMap[base64Str.charCodeAt(i - 1)] << ((i % 4) * 2);
+                const bits2 = reverseMap[base64Str.charCodeAt(i)] >>> (6 - (i % 4) * 2);
+                words[nBytes >>> 2] |= (bits1 | bits2) << (24 - (nBytes % 4) * 8);
+                nBytes++;
+            }
+        }
+
+        return new WordArray(words, nBytes);
+    }
 
 }
