@@ -181,7 +181,7 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
         });
       }
     },
-    [user],
+    [user, chats],
   );
 
   useEffect(() => {
