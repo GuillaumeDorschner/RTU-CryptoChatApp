@@ -6,13 +6,13 @@ import { AESImpl } from '../CryptoAlgs/AES/AES';
 import { aesConstants } from '../CryptoAlgs/AES/AESConstants';
 import { WordArray } from '../CryptoAlgs/Utils/WordArray';
 
-const aes = (new AESImpl())
+const aes = new AESImpl();
 
-function getOrThrowStr(input:string|undefined): string{
-  if(typeof input === 'string'){
-    return input
+function getOrThrowStr(input: string | undefined): string {
+  if (typeof input === 'string') {
+    return input;
   }
-  throw new Error("string was undefined")
+  throw new Error('string was undefined');
 }
 
 function getByteLengthUtf16(input: string): number {
@@ -35,24 +35,24 @@ const ChatInput = () => {
         time: new Date(),
       };
 
-
       const chat = chats.find((chat) => chat.id === user.openChatId);
 
       const participantId = chat?.participantId;
       const sharedKey = chat?.cryptographie?.AESkey;
-      const salt = new WordArray([-939201693,719097864], 8) //TODO: Send with message
-      aes.init(getOrThrowStr(sharedKey), getByteLengthUtf16(getOrThrowStr(sharedKey)), aesConstants, salt) 
-      console.log("shared key 4: "+ sharedKey)
-
+      aes.init(getOrThrowStr(sharedKey), getByteLengthUtf16(getOrThrowStr(sharedKey)), aesConstants);
+      const salt = aes._salt;
+      console.log('shared key 4: ' + sharedKey);
 
       const encryptedMessage: string = WordArray.stringifyBase64(aes.encryptMessage(messageInput.trim(), aesConstants));
-      console.log("Encrypted message source: "+ encryptedMessage)
+      console.log('Encrypted message source: ' + encryptedMessage);
+      console.log('Salt: ' + salt);
 
       const data = {
         type: 'relayEncryptedMessage',
         senderId: user.id,
         recipientId: participantId,
         encryptedMessage: encryptedMessage,
+        salt: salt,
       };
 
       ws?.send(JSON.stringify(data));
