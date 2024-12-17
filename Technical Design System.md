@@ -53,7 +53,7 @@ Securely exchange ECDH keys and establish an AES key for chat encryption. We wil
 At the end we get posiion of the key in the curve and we can generate the same key for both users. We will use only the x coordinate of the key (it's very common) and we will use it as the key for the AES encryption. Before using the shared secret we need to verify if the point does fall into the curve if so we will derive the key using a [KDF (Key Derivation Function)](https://en.wikipedia.org/wiki/Key_derivation_function) to make it more secure.
 
 <p align="center">
-<img src="./img/EC_anim.gif"/>
+<img src="./media/EC_anim.gif"/>
 <p align="center" >Example of the Elliptic Curve</p>
 </p>
 
