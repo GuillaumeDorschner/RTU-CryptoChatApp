@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react';
-import Messages from './Messages';
-import { useChatContext } from '../context/ChatContext';
+import { useEffect, useRef } from "react";
+import Messages from "./Messages";
+import { useChatContext } from "../context/ChatContext";
 
 const Chat = () => {
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -9,25 +9,27 @@ const Chat = () => {
 
   if (!user) return null;
 
+  // TODO: problem
   const other = chats.find((chat) => chat.id === user.openChatId);
 
   useEffect(() => {
     if (chatEndRef.current) {
-      chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      chatEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [other?.messages]);
 
   return (
-    <div className="p-4 bg-bgCard rounded-lg h-full flex flex-col">
-      <div className="flex-grow overflow-y-auto mt-2 space-y-2">
+    <div className="flex h-full flex-col rounded-lg bg-bgCard p-4">
+      <div className="mt-2 flex-grow space-y-2 overflow-y-auto">
         {other?.messages.map((msg, index) => {
           const isCurrentUser = msg.senderId === user.id;
-          const showName = index === 0 || other.messages[index - 1].senderId !== msg.senderId;
+          const showName =
+            index === 0 || other.messages[index - 1].senderId !== msg.senderId;
 
           return (
             <Messages
               key={index}
-              name={showName ? (isCurrentUser ? 'You' : other?.name) : ''}
+              name={showName ? (isCurrentUser ? "You" : other?.name) : ""}
               message={msg.text}
               isCurrentUser={isCurrentUser}
             />

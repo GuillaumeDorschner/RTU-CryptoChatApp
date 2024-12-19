@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useChatContext } from '../context/ChatContext';
+import { useEffect, useState } from "react";
+import { useChatContext } from "../context/ChatContext";
 
 const ChatSettingsDrawer = () => {
   const { user, chats, setChats } = useChatContext();
@@ -7,19 +7,21 @@ const ChatSettingsDrawer = () => {
 
   useEffect(() => {
     const id = user?.openChatId;
+    // TODO: problem
     const chat = chats.find((chat) => chat.id === id);
     if (chat) {
-      setKey(chat.AESkey);
+      setKey(chat.cryptographie?.AESkey);
     }
-  }, [user?.id, chats]);
+  }, [user?.openChatId, chats]);
 
   const handleDeleteChat = () => {
     const id = user?.openChatId;
+    // TODO: problem
     const updatedChats = chats.filter((chat) => chat.id !== id);
     setChats(updatedChats);
   };
   const handleLogout = () => {
-    document.cookie = 'userId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    document.cookie = "userId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     localStorage.clear();
     window.location.reload();
   };
@@ -28,13 +30,19 @@ const ChatSettingsDrawer = () => {
     <div className="flex flex-col">
       <p className="py-2 text-xl">Settings</p>
       <p className="py-2 text-lg">Key</p>
-      <p>{key}</p>
+      <p className="w-full break-words py-2 text-lg">{key}</p>
       <p className="py-2 text-lg">Danger</p>
-      <button onClick={handleDeleteChat} className="py-2 px-4 bg-red-500 text-white rounded-lg">
+      <button
+        onClick={handleDeleteChat}
+        className="rounded-lg bg-red-500 px-4 py-2 text-white"
+      >
         Delete the chat
       </button>
       <p>the logout boutton will delete all data on the app</p>
-      <button onClick={handleLogout} className="py-2 px-4 bg-red-500 text-white rounded-lg">
+      <button
+        onClick={handleLogout}
+        className="rounded-lg bg-red-500 px-4 py-2 text-white"
+      >
         Logout
       </button>
     </div>

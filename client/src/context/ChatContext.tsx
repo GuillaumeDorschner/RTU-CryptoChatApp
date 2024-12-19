@@ -1,6 +1,21 @@
-import { createContext, useContext, useState, useMemo, ReactNode, useCallback, useEffect } from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { Point, Secp256k1, ECC, AESImpl, aesConstants, WordArray } from 'crypto-lib';
+import {
+  createContext,
+  useContext,
+  useState,
+  useMemo,
+  ReactNode,
+  useCallback,
+  useEffect,
+} from "react";
+import { v4 as uuidv4 } from "uuid";
+import {
+  Point,
+  Secp256k1,
+  ECC,
+  AESImpl,
+  aesConstants,
+  WordArray,
+} from "crypto-lib";
 
 type Message = {
   text: string;
@@ -45,10 +60,10 @@ type ChatContextType = {
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
 function getOrThrowStr(input: string | undefined): string {
-  if (typeof input === 'string') {
+  if (typeof input === "string") {
     return input;
   }
-  throw new Error('string was undefined');
+  throw new Error("string was undefined");
 }
 
 function getByteLengthUtf16(input: string): number {
@@ -69,8 +84,8 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
     (event: MessageEvent) => {
       const message = JSON.parse(event.data);
 
-      if (message.type === 'publicKeyOne') {
-        console.log('public key received', message);
+      if (message.type === "publicKeyOne") {
+        console.log("public key received", message);
 
         const randomId = uuidv4();
 
@@ -80,16 +95,19 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
         const ownPrivateKey: string = ecc.sk.toString();
         const remotePublicKey = message.publicKey;
 
-        console.log('Remote pk: ' + remotePublicKey);
-        const sharedKey: string = Point.publicKeyToPoint(remotePublicKey, new Secp256k1())
+        console.log("Remote pk: " + remotePublicKey);
+        const sharedKey: string = Point.publicKeyToPoint(
+          remotePublicKey,
+          new Secp256k1(),
+        )
           .scalarMul(ecc.sk)
           .x.toString();
 
-        console.log('Shared key: ' + sharedKey);
+        console.log("Shared key: " + sharedKey);
 
         const data = {
-          type: 'relayPublicKey',
-          keyType: 'publicKeyTwo',
+          type: "relayPublicKey",
+          keyType: "publicKeyTwo",
           senderId: user?.id,
           recipientId: message.senderId,
           publicKey: ownPublicKey,
@@ -98,8 +116,8 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
 
         ws?.send(JSON.stringify(data));
 
-        console.log('public key sent', data);
-        console.log('Private key type:' + typeof ownPrivateKey);
+        console.log("public key sent", data);
+        console.log("Private key type:" + typeof ownPrivateKey);
 
         setChats((prevChats) => [
           ...prevChats,
@@ -117,8 +135,8 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
         ]);
       }
 
-      if (message.type === 'publicKeyTwo') {
-        console.log('public key received', message);
+      if (message.type === "publicKeyTwo") {
+        console.log("public key received", message);
 
         const remotePublicKey = message.publicKey;
         const name = message.senderName;
@@ -128,11 +146,14 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
             if (chat.participantId === message.senderId) {
               const ownPrivateKey: string = chat.cryptographie.privateKey;
 
-              console.log('ownPrivateKey: ' + ownPrivateKey);
-              const sharedKey: string = Point.publicKeyToPoint(remotePublicKey, new Secp256k1())
+              console.log("ownPrivateKey: " + ownPrivateKey);
+              const sharedKey: string = Point.publicKeyToPoint(
+                remotePublicKey,
+                new Secp256k1(),
+              )
                 .scalarMul(BigInt(ownPrivateKey))
                 .x.toString();
-              console.log('shared Key 2: ' + sharedKey);
+              console.log("shared Key 2: " + sharedKey);
 
               return {
                 ...chat,
@@ -148,19 +169,29 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
         );
       }
 
-      if (message.type === 'encryptedMessage') {
-        console.log('encrypted message received', message);
-        const chat = chats.find((chat) => chat.participantId === message.senderId);
+      if (message.type === "encryptedMessage") {
+        console.log("encrypted message received", message);
+        const chat = chats.find(
+          (chat) => chat.participantId === message.senderId,
+        );
 
         const sharedKey: string = getOrThrowStr(chat?.cryptographie.AESkey);
-        console.log('sharedKey 3: ' + sharedKey);
-        console.log('Encrypted message: ' + message.encryptedMessage);
+        console.log("sharedKey 3: " + sharedKey);
+        console.log("Encrypted message: " + message.encryptedMessage);
         const salt = message.salt;
-        console.log('Salt: ' + salt);
+        console.log("Salt: " + salt);
         const decryptedMessage: string = new AESImpl()
-          .init(getOrThrowStr(sharedKey), getByteLengthUtf16(sharedKey), aesConstants, salt)
-          .decryptMessage(WordArray.parseBase64(message.encryptedMessage), aesConstants);
-        console.log('Decrypted message: ' + decryptedMessage);
+          .init(
+            getOrThrowStr(sharedKey),
+            getByteLengthUtf16(sharedKey),
+            aesConstants,
+            salt,
+          )
+          .decryptMessage(
+            WordArray.parseBase64(message.encryptedMessage),
+            aesConstants,
+          );
+        console.log("Decrypted message: " + decryptedMessage);
 
         const newMessage = {
           text: decryptedMessage,
@@ -172,7 +203,9 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
 
         setChats((prevChats) => {
           return prevChats.map((c) =>
-            c.participantId === message.senderId ? { ...c, messages: [...c.messages, newMessage] } : c,
+            c.participantId === message.senderId
+              ? { ...c, messages: [...c.messages, newMessage] }
+              : c,
           );
         });
       }
@@ -182,17 +215,17 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (user) {
-      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem("user", JSON.stringify(user));
     }
   }, [user]);
 
   useEffect(() => {
     if (chats && chats.length > 0) {
-      console.log('chats:' + chats);
+      console.log("chats:" + chats);
       localStorage.setItem(
-        'chats',
+        "chats",
         JSON.stringify(chats, (key, value) => {
-          value = key == 'privateKey' ? value.toString() : value;
+          value = key == "privateKey" ? value.toString() : value;
           console.log(key, value, typeof value);
           return value;
         }),
@@ -202,14 +235,14 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (settings) {
-      localStorage.setItem('settings', JSON.stringify(settings));
+      localStorage.setItem("settings", JSON.stringify(settings));
     }
   }, [settings]);
 
   useEffect(() => {
-    console.log('User:', user);
-    console.log('Chats:', chats);
-    console.log('Settings', settings);
+    console.log("User:", user);
+    console.log("Chats:", chats);
+    console.log("Settings", settings);
   }, [user, chats, settings]);
 
   useEffect(() => {
@@ -232,13 +265,15 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
     [user, chats, settings, ws],
   );
 
-  return <ChatContext.Provider value={contextValue}>{children}</ChatContext.Provider>;
+  return (
+    <ChatContext.Provider value={contextValue}>{children}</ChatContext.Provider>
+  );
 };
 
 export const useChatContext = () => {
   const context = useContext(ChatContext);
   if (!context) {
-    throw new Error('useChatContext must be used within a ChatContextProvider');
+    throw new Error("useChatContext must be used within a ChatContextProvider");
   }
   return context;
 };
