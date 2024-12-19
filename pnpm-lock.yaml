@@ -149,6 +149,9 @@ importers:
       '@types/ws':
         specifier: ^8.5.13
         version: 8.5.13
+      crypto-lib:
+        specifier: workspace:*
+        version: link:../crypto-lib
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@types/node@22.10.1)(typescript@5.7.2)
