@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPaperPlane } from '@fortawesome/free-solid-svg-icons';
 import { useChatContext } from '../context/ChatContext';
-import { AESImpl, WordArray } from 'crypto-lib';
+import { AESImpl, aesConstants, WordArray } from 'crypto-lib';
 
 const aes = new AESImpl();
 
