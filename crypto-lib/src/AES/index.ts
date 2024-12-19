@@ -1,3 +1,3 @@
 export { AESImpl } from './AES';
-export { AESConstants } from './AESConstants';
+export { AESConstants, aesConstants } from './AESConstants';
 export { KeyIVUtils } from './KeyIVUtils';
