@@ -1,11 +1,6 @@
 import { createContext, useContext, useState, useMemo, ReactNode, useCallback, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { Point } from '../CryptoAlgs/ECC/point';
-import { Secp256k1 } from '../CryptoAlgs/ECC/curve';
-import { ECC } from '../CryptoAlgs/ECC/ecc';
-import { AESImpl } from '../CryptoAlgs/AES/AES';
-import { aesConstants } from '../CryptoAlgs/AES/AESConstants';
-import { WordArray } from '../CryptoAlgs/Utils/WordArray';
+import { Point, Secp256k1, ECC, AESImpl, aesConstants, WordArray } from 'crypto-lib';
 
 type Message = {
   text: string;

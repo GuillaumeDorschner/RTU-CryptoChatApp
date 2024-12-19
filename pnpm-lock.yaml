@@ -32,21 +32,18 @@ importers:
       '@types/node':
         specifier: ^22.10.1
         version: 22.10.1
+      crypto-lib:
+        specifier: workspace:*
+        version: link:../crypto-lib
       react:
         specifier: ^18.3.1
         version: 18.3.1
       react-dom:
         specifier: ^18.3.1
         version: 18.3.1(react@18.3.1)
-      shared:
-        specifier: link:../shared
-        version: link:../shared
       ts-matrix:
         specifier: ^1.3.2
         version: 1.3.2
-      ts-md5:
-        specifier: ^1.3.1
-        version: 1.3.1
       uuid:
         specifier: ^11.0.3
         version: 11.0.3
@@ -103,6 +100,22 @@ importers:
         specifier: ^6.0.1
         version: 6.0.3(@types/node@22.10.1)(jiti@1.21.6)(yaml@2.6.1)
 
+  crypto-lib:
+    dependencies:
+      '@types/node':
+        specifier: ^22.10.1
+        version: 22.10.1
+      ts-md5:
+        specifier: ^1.3.1
+        version: 1.3.1
+    devDependencies:
+      jest:
+        specifier: ^29.0.0
+        version: 29.7.0(@types/node@22.10.1)(ts-node@10.9.2(@types/node@22.10.1)(typescript@5.7.2))
+      typescript:
+        specifier: ^5.0.0
+        version: 5.7.2
+
   server:
     dependencies:
       cookie-parser:
@@ -114,9 +127,6 @@ importers:
       express:
         specifier: ^4.21.1
         version: 4.21.1
-      shared:
-        specifier: link:../shared
-        version: link:../shared
       uuid:
         specifier: ^11.0.3
         version: 11.0.3
@@ -139,15 +149,12 @@ importers:
       '@types/ws':
         specifier: ^8.5.13
         version: 8.5.13
+      crypto-lib:
+        specifier: workspace:*
+        version: link:../crypto-lib
       ts-node:
         specifier: ^10.9.2
         version: 10.9.2(@types/node@22.10.1)(typescript@5.7.2)
-      typescript:
-        specifier: ^5.7.2
-        version: 5.7.2
-
-  shared:
-    devDependencies:
       typescript:
         specifier: ^5.7.2
         version: 5.7.2

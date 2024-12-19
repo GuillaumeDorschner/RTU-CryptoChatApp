@@ -1,4 +1,4 @@
-name: Build and Publish Docker Images to GHCR
+name: Test & Build and Publish Docker Images to GHCR
 
 on:
   push:
@@ -6,6 +6,16 @@ on:
       - main
 
 jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run tests
+        run: pnpm test
+
   build-and-publish:
     runs-on: ubuntu-latest
 
