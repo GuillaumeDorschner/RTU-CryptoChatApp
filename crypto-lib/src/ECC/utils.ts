@@ -1,4 +1,3 @@
-
 export function getRandomNumber(bytes = 32, modulus?: bigint) {
   const array = new Uint8Array(bytes);
 
@@ -6,8 +5,8 @@ export function getRandomNumber(bytes = 32, modulus?: bigint) {
 
   // See: https://stackoverflow.com/a/75259983
   const hexString = Array.from(array)
-    .map((i) => i.toString(16).padStart(2, "0"))
-    .join("");
+    .map((i) => i.toString(16).padStart(2, '0'))
+    .join('');
 
   const number = BigInt(`0x${hexString}`);
 
@@ -66,11 +65,8 @@ export function inverseOf(number: bigint, modulus: bigint) {
 
   if (gcd !== 1n) {
     // Either `number` is 0 or `modulus` is not prime.
-    throw new Error(
-      `${number} has no multiplicative inverse modulo ${modulus}...`,
-    );
+    throw new Error(`${number} has no multiplicative inverse modulo ${modulus}...`);
   }
-
 
   return mod(x, modulus);
 }
@@ -87,8 +83,7 @@ export function int2Hex(number: bigint, prefix = true, pad = true) {
 }
 
 export function hex2Int(hex: string) {
-  
-  if (hex.startsWith("0x")) {
+  if (hex.startsWith('0x')) {
     hex = hex.slice(2);
   }
 
@@ -99,9 +94,7 @@ export function hex2Int(hex: string) {
 
 // See: https://stackoverflow.com/a/40031979
 export function buf2hex(buffer: Uint8Array, prefix = true) {
-  const result = [...new Uint8Array(buffer)]
-    .map((x) => x.toString(16).padStart(2, "0"))
-    .join("");
+  const result = [...new Uint8Array(buffer)].map((x) => x.toString(16).padStart(2, '0')).join('');
 
   if (prefix) {
     return `0x${result}`;
@@ -113,13 +106,13 @@ export function buf2hex(buffer: Uint8Array, prefix = true) {
 // See: https://stackoverflow.com/a/40031979
 export function hex2buf(hex: string): Uint8Array {
   // Remove optional "0x" prefix if present
-  if (hex.startsWith("0x")) {
+  if (hex.startsWith('0x')) {
     hex = hex.slice(2);
   }
 
   // Ensure the hex string has an even length
   if (hex.length % 2 !== 0) {
-    throw new Error("Invalid hex string: must have an even length.");
+    throw new Error('Invalid hex string: must have an even length.');
   }
 
   // Convert each pair of hex characters into a byte
@@ -152,11 +145,11 @@ export function int2BytesLe(int: bigint, padding = 32) {
 }
 
 export function fromLittleEndian(bytes: Uint8Array) {
-  let result = 0n
-  let base = 1n
+  let result = 0n;
+  let base = 1n;
   bytes.forEach(function (byte) {
-      result += base * BigInt(byte);
-      base = base * 256n;
+    result += base * BigInt(byte);
+    base = base * 256n;
   });
   return result;
 }
@@ -164,6 +157,3 @@ export function fromLittleEndian(bytes: Uint8Array) {
 export function fromBigEndian(bytes: Uint8Array) {
   return fromLittleEndian(bytes.reverse());
 }
-
-
-

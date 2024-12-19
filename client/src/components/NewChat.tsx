@@ -2,7 +2,7 @@ import { useState } from 'react';
 import ToggleDarkMode from './ToggleDarkMode';
 import { useChatContext } from '../context/ChatContext';
 import { v4 as uuidv4 } from 'uuid';
-import { ECC } from '../CryptoAlgs/ECC/ecc';
+import { ECC } from 'crypto-lib';
 
 const NewChat = () => {
   const { user, setUser, chats, setChats, ws } = useChatContext();
@@ -13,7 +13,7 @@ const NewChat = () => {
 
     const randomId = uuidv4();
 
-    const ecc = (new ECC())
+    const ecc = new ECC();
 
     const publicKey = ecc.getPublicKey();
     const privateKey = ecc.sk;
