@@ -1,12 +1,12 @@
-import NewChat from './NewChat';
-import Chat from './Chat';
-import { useChatContext } from '../context/ChatContext';
+import NewChat from "./NewChat";
+import Chat from "./Chat";
+import { useChatContext } from "../context/ChatContext";
 
 const Sidebar = () => {
   const { user, chats } = useChatContext();
 
   return (
-    <div className=" h-full flex flex-col">
+    <div className="flex h-full flex-col">
       <NewChat />
       <div className="max-h-max overflow-y-auto">
         {chats.map((chat) => (

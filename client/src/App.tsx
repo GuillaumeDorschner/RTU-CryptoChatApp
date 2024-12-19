@@ -1,19 +1,19 @@
-// TODO: remove shared folder
-import './App.css';
-import { useState, useEffect, useRef } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import "./App.css";
+import { useState, useEffect, useRef } from "react";
+import { v4 as uuidv4 } from "uuid";
 
-import Sidebar from './components/Sidebar';
-import ChatHeader from './components/ChatHeader';
-import ChatMessages from './components/ChatMessages';
-import ChatInput from './components/ChatInput';
-import ChatSettingsDrawer from './components/ChatSettingsDrawer';
+import Sidebar from "./components/Sidebar";
+import ChatHeader from "./components/ChatHeader";
+import ChatMessages from "./components/ChatMessages";
+import ChatInput from "./components/ChatInput";
+import ChatSettingsDrawer from "./components/ChatSettingsDrawer";
 
-import { useChatContext } from './context/ChatContext';
+import { useChatContext } from "./context/ChatContext";
 
 function App() {
-  const { user, setUser, setChats, settings, setSettings, setWebSocket } = useChatContext();
-  const [usernameInput, setUsernameInput] = useState('');
+  const { user, setUser, setChats, settings, setSettings, setWebSocket } =
+    useChatContext();
+  const [usernameInput, setUsernameInput] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const wsRef = useRef<WebSocket | null>(null);
 
@@ -25,18 +25,18 @@ function App() {
       wsRef.current = ws;
 
       ws.onopen = () => {
-        console.log('WebSocket connected');
-        ws.send(JSON.stringify({ type: 'connect', userId }));
+        console.log("WebSocket connected");
+        ws.send(JSON.stringify({ type: "connect", userId }));
       };
 
       ws.onmessage = (event) => {
         const message = JSON.parse(event.data);
-        console.log('Received WebSocket message:', message);
+        console.log("Received WebSocket message:", message);
         // Handle ChatContext
       };
 
       ws.onclose = () => {
-        console.log('WebSocket closed');
+        console.log("WebSocket closed");
         wsRef.current = null;
       };
 
@@ -46,12 +46,12 @@ function App() {
 
   const initializeUser = () => {
     const storedUserId = document.cookie
-      .split('; ')
-      .find((row) => row.startsWith('userId='))
-      ?.split('=')[1];
-    const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-    const storedChats = localStorage.getItem('chats') || '[]';
-    const storedSettings = JSON.parse(localStorage.getItem('settings') || '{}');
+      .split("; ")
+      .find((row) => row.startsWith("userId="))
+      ?.split("=")[1];
+    const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+    const storedChats = localStorage.getItem("chats") || "[]";
+    const storedSettings = JSON.parse(localStorage.getItem("settings") || "{}");
 
     if (storedUserId) {
       const newUser = {
@@ -61,7 +61,7 @@ function App() {
       };
 
       const newSettings = {
-        theme: storedSettings.theme || 'light',
+        theme: storedSettings.theme || "light",
         open: storedSettings.open || false,
       };
 
@@ -79,9 +79,9 @@ function App() {
       document.cookie = `userId=${userId}; path=/`;
       initializeWebSocket(userId);
       initializeUser();
-      setUsernameInput('');
+      setUsernameInput("");
     } else {
-      console.warn('Username cannot be empty.');
+      console.warn("Username cannot be empty.");
     }
   };
 
@@ -91,7 +91,7 @@ function App() {
 
   if (isLoading) {
     return (
-      <div className="h-screen w-full flex justify-center items-center bg-bgGlobal text-text">
+      <div className="flex h-screen w-full items-center justify-center bg-bgGlobal text-text">
         <p>Loading...</p>
       </div>
     );
@@ -100,21 +100,21 @@ function App() {
   return (
     <>
       {!user?.id ? (
-        <div className="h-screen w-full flex overflow-hidden bg-bgGlobal p-4 text-text justify-center items-center">
-          <div className="p-4 rounded-lg bg-bgCard h-max">
+        <div className="flex h-screen w-full items-center justify-center overflow-hidden bg-bgGlobal p-4 text-text">
+          <div className="h-max rounded-lg bg-bgCard p-4">
             <p>Username</p>
             <input
               type="text"
               value={usernameInput}
               onChange={(e) => setUsernameInput(e.target.value)}
-              className="flex-grow p-2 border-2 border-bgGlobal rounded-lg outline-text bg-bgCard focus:ring focus:ring-blue-300"
+              className="flex-grow rounded-lg border-2 border-bgGlobal bg-bgCard p-2 outline-text focus:ring focus:ring-blue-300"
               placeholder="Enter your username"
               onKeyDown={(e) => {
-                if (e.key === 'Enter') handleUsernameSubmit();
+                if (e.key === "Enter") handleUsernameSubmit();
               }}
             />
             <button
-              className="p-2 mt-4 ml-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+              className="ml-2 mt-4 rounded-lg bg-blue-500 p-2 text-white hover:bg-blue-600"
               onClick={handleUsernameSubmit}
             >
               Submit
@@ -122,11 +122,11 @@ function App() {
           </div>
         </div>
       ) : (
-        <div className="h-screen w-full flex overflow-hidden bg-bgGlobal p-4 text-text">
-          <div className="flex-shrink-0 w-1/5">
+        <div className="flex h-screen w-full overflow-hidden bg-bgGlobal p-4 text-text">
+          <div className="w-1/5 flex-shrink-0">
             <Sidebar />
           </div>
-          <div className="flex flex-col mx-6 flex-grow p-4 rounded-lg bg-bgCard">
+          <div className="mx-6 flex flex-grow flex-col rounded-lg bg-bgCard p-4">
             <ChatHeader />
             <div className="flex-grow overflow-y-auto">
               <ChatMessages />
@@ -134,7 +134,7 @@ function App() {
             <ChatInput />
           </div>
           {settings?.open && (
-            <div className="flex-shrink-0 w-1/4 p-4 rounded-lg bg-bgCard">
+            <div className="w-1/4 flex-shrink-0 rounded-lg bg-bgCard p-4">
               <ChatSettingsDrawer />
             </div>
           )}
