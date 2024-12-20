@@ -1,6 +1,6 @@
 import { WebSocketServer } from 'ws';
 import type { WebSocket } from 'ws';
-import { WordArray } from '../../client/src/CryptoAlgs/Utils/WordArray';
+import { WordArray } from 'crypto-lib';
 
 type Message =
   | { type: 'connect'; userId: string }

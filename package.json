@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "concurrently \"pnpm --prefix client dev\" \"pnpm --prefix server dev\"",
-    "test": "cd client && pnpm test"
+    "test": "cd crypto-lib && npm test"
   },
   "keywords": [],
   "author": "",
