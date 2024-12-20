@@ -76,7 +76,10 @@ function App() {
   const handleUsernameSubmit = () => {
     if (usernameInput.trim()) {
       const userId = uuidv4();
-      document.cookie = `userId=${userId}; path=/`;
+      const oneWeekFromNow = new Date();
+      oneWeekFromNow.setDate(oneWeekFromNow.getDate() + 7); // Add 7 days
+      document.cookie = `userId=${userId}; path=/; expires=${oneWeekFromNow.toUTCString()};`;
+
       initializeWebSocket(userId);
       initializeUser();
       setUsernameInput("");
