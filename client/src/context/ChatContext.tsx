@@ -150,7 +150,7 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
         setChats((prevChats) =>
           prevChats.map((chat) => {
             if (chat.participantId === message.senderId) {
-              const ownPrivateKey: string = chat.cryptographie.privateKey;
+              const ownPrivateKey: string = chat.cryptographie.privateKey; // TODO: fix the type of privateKey
 
               console.log("ownPrivateKey: " + ownPrivateKey);
               const sharedKey: string = Point.publicKeyToPoint(

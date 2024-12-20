@@ -1,7 +1,9 @@
-import { Curve, Secp256k1 } from "./curve";
-import { getRandomNumber, int2Hex } from "./utils";
-import { PrivateKey } from "./types";
-import { Point } from "./point";
+// Underlying AES implementation
+// improve AES
+import { Curve, Secp256k1 } from './curve';
+import { getRandomNumber, int2Hex } from './utils';
+import { PrivateKey } from './types';
+import { Point } from './point';
 
 export class ECC {
   readonly sk: bigint;
