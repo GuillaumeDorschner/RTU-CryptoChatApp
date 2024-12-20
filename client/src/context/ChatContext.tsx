@@ -17,31 +17,31 @@ import {
   WordArray,
 } from "crypto-lib";
 
-type Message = {
+export type Message = {
   text: string;
   senderId: string;
   time: Date;
 };
 
-type Chat = {
+export type Chat = {
   id: string;
   name: string;
   participantId: string;
   cryptographie: {
     AESkey: string;
     publicKey: string;
-    privateKey: string;
+    privateKey: bigint | string;
   };
   messages: Message[];
 };
 
-type User = {
+export type User = {
   name: string;
   id: string;
-  openChatId: number | null;
+  openChatId: string | null;
 };
 
-type Settings = {
+export type Settings = {
   theme: string;
   open: boolean;
 };
@@ -133,6 +133,12 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
             messages: [],
           },
         ]);
+
+        setUser({
+          name: user?.name || "",
+          id: user?.id || "",
+          openChatId: randomId,
+        });
       }
 
       if (message.type === "publicKeyTwo") {
@@ -241,9 +247,15 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     console.log("User:", user);
+  }, [user]);
+
+  useEffect(() => {
     console.log("Chats:", chats);
+  }, [chats]);
+
+  useEffect(() => {
     console.log("Settings", settings);
-  }, [user, chats, settings]);
+  }, [settings]);
 
   useEffect(() => {
     if (ws) {

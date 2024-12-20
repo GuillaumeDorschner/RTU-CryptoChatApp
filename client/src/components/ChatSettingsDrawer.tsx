@@ -7,7 +7,6 @@ const ChatSettingsDrawer = () => {
 
   useEffect(() => {
     const id = user?.openChatId;
-    // TODO: problem
     const chat = chats.find((chat) => chat.id === id);
     if (chat) {
       setKey(chat.cryptographie?.AESkey);
@@ -16,7 +15,6 @@ const ChatSettingsDrawer = () => {
 
   const handleDeleteChat = () => {
     const id = user?.openChatId;
-    // TODO: problem
     const updatedChats = chats.filter((chat) => chat.id !== id);
     setChats(updatedChats);
   };

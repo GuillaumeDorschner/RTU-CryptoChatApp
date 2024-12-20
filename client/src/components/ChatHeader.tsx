@@ -1,19 +1,19 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGear } from "@fortawesome/free-solid-svg-icons";
-import { useChatContext } from "../context/ChatContext";
+import { useChatContext, Settings } from "../context/ChatContext";
 
 const ChatHeader = () => {
-  const { user, chats, setSettings } = useChatContext();
+  const { user, chats, settings, setSettings } = useChatContext();
 
   const toggleSetting = () => {
-    // TODO: problem
-    setSettings((prevSettings) => ({
-      ...prevSettings,
-      open: !prevSettings.open,
-    }));
+    const newSettings: Settings = {
+      theme: settings?.theme || "light",
+      open: !settings?.open || false,
+    };
+
+    setSettings(newSettings);
   };
 
-  // TODO: problem
   const name = chats.find((chat) => chat.id === user?.openChatId)?.name;
 
   return (
