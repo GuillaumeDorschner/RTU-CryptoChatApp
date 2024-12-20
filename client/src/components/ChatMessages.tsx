@@ -9,7 +9,6 @@ const Chat = () => {
 
   if (!user) return null;
 
-  // TODO: problem
   const other = chats.find((chat) => chat.id === user.openChatId);
 
   useEffect(() => {

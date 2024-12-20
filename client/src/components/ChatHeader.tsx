@@ -14,7 +14,6 @@ const ChatHeader = () => {
     setSettings(newSettings);
   };
 
-  // TODO: problem
   const name = chats.find((chat) => chat.id === user?.openChatId)?.name;
 
   return (

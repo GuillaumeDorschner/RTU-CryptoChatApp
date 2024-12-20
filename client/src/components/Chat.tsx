@@ -1,7 +1,7 @@
 import { useChatContext, User } from "../context/ChatContext";
 
 interface ChatProps {
-  id: number;
+  id: string;
   name: string;
   lastMessage: string;
   focus: boolean;

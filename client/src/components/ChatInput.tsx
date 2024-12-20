@@ -33,7 +33,6 @@ const ChatInput = () => {
         time: new Date(),
       };
 
-      // TODO: comparison problem
       const chat = chats.find((chat) => chat.id === user.openChatId);
 
       const participantId = chat?.participantId;
@@ -63,7 +62,6 @@ const ChatInput = () => {
       ws?.send(JSON.stringify(data));
 
       const updatedChats = chats.map((chat) =>
-        // TODO: comparison problem
         chat.id === user.openChatId
           ? { ...chat, messages: [...chat.messages, newMessage] }
           : chat,

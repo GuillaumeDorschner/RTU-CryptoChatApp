@@ -26,6 +26,13 @@ const NewChat = () => {
       return;
     }
 
+    // id can as your id
+    if (newChatId === user?.id) {
+      console.log("Cannot chat with yourself");
+      alert("Cannot chat with yourself");
+      return;
+    }
+
     const data = {
       type: "relayPublicKey",
       keyType: "publicKeyOne",
@@ -50,6 +57,12 @@ const NewChat = () => {
     };
 
     setChats([...chats, newChat]);
+
+    setUser({
+      name: user?.name || "",
+      id: user?.id || "",
+      openChatId: randomId,
+    });
   };
   return (
     <div className="mb-4 flex max-w-full flex-col rounded-lg bg-bgCard p-4">

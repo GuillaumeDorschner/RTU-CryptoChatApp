@@ -30,7 +30,7 @@ export type Chat = {
   cryptographie: {
     AESkey: string;
     publicKey: string;
-    privateKey: string;
+    privateKey: bigint | string;
   };
   messages: Message[];
 };
@@ -38,7 +38,7 @@ export type Chat = {
 export type User = {
   name: string;
   id: string;
-  openChatId: number | null;
+  openChatId: string | null;
 };
 
 export type Settings = {
@@ -133,6 +133,12 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
             messages: [],
           },
         ]);
+
+        setUser({
+          name: user?.name || "",
+          id: user?.id || "",
+          openChatId: randomId,
+        });
       }
 
       if (message.type === "publicKeyTwo") {
