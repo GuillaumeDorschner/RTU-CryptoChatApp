@@ -17,13 +17,13 @@ import {
   WordArray,
 } from "crypto-lib";
 
-type Message = {
+export type Message = {
   text: string;
   senderId: string;
   time: Date;
 };
 
-type Chat = {
+export type Chat = {
   id: string;
   name: string;
   participantId: string;
@@ -35,13 +35,13 @@ type Chat = {
   messages: Message[];
 };
 
-type User = {
+export type User = {
   name: string;
   id: string;
   openChatId: number | null;
 };
 
-type Settings = {
+export type Settings = {
   theme: string;
   open: boolean;
 };
@@ -241,9 +241,15 @@ export const ChatContextProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     console.log("User:", user);
+  }, [user]);
+
+  useEffect(() => {
     console.log("Chats:", chats);
+  }, [chats]);
+
+  useEffect(() => {
     console.log("Settings", settings);
-  }, [user, chats, settings]);
+  }, [settings]);
 
   useEffect(() => {
     if (ws) {
