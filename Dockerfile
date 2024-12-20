@@ -11,8 +11,10 @@ RUN pnpm install
 
 COPY client ./client
 COPY server ./server
+COPY crypto-lib ./crypto-lib
 
 RUN pnpm install --filter "./client..."
+RUN pnpm install --filter "./crypto-lib..."
 RUN pnpm install --filter "./server..."
 
 EXPOSE 80 3000 3001
