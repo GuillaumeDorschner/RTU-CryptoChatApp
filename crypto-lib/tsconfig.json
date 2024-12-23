@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "types": ["jest"],
     "moduleResolution": "node",
     "module": "ESNext",
     "target": "es2020",
@@ -16,6 +17,6 @@
     "strict": true,
     "skipLibCheck": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "tests", "test/**/*"]
+  "include": ["src/**/*", "src/tests/**/*"],
+  "exclude": ["node_modules"]
 }
