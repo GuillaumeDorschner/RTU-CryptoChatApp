@@ -1,5 +1,6 @@
-// Underlying AES implementation
-// improve AES
+// TODO: Underlying AES implementation
+// TODO: improve AES
+
 import { PKCS7Impl } from '../Padding/PKCS7';
 import { NumberArrayToBinary } from '../Utils/printFormat';
 import { WordArray } from '../Utils/WordArray';

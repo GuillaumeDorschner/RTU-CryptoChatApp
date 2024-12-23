@@ -1,3 +1,7 @@
+// TODO: Improve the variable names
+// TODO: add comments
+// TODO: refactor the code
+
 import "./App.css";
 import { useState, useEffect, useRef } from "react";
 import { v4 as uuidv4 } from "uuid";
@@ -48,7 +52,7 @@ function App() {
     const storedUserId = document.cookie
       .split("; ")
       .find((row) => row.startsWith("userId="))
-      ?.split("=")[1];
+      ?.split("=")[1]; // reset the cookie expiration date to 7 days from now & create a date var for localstorage
     const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
     const storedChats = localStorage.getItem("chats") || "[]";
     const storedSettings = JSON.parse(localStorage.getItem("settings") || "{}");
@@ -69,6 +73,8 @@ function App() {
       setChats(JSON.parse(storedChats));
       setSettings(newSettings);
       initializeWebSocket(storedUserId);
+    } else {
+      localStorage.clear();
     }
     setIsLoading(false);
   };

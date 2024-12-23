@@ -1,5 +1,6 @@
-// Underlying AES implementation
-// improve AES
+// TODO: Underlying AES implementation
+// TODO: improve AES
+
 import { Curve, Secp256k1 } from './curve';
 import { getRandomNumber, int2Hex } from './utils';
 import { PrivateKey } from './types';
