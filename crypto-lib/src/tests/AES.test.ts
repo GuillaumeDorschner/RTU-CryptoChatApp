@@ -1,4 +1,4 @@
-import { AESImpl, aesConstants } from '../AES/index';
+import { AES } from '../AES/index';
 import { WordArray } from '../Utils/WordArray';
 
 describe('AES Encryption-Decryption', () => {
@@ -6,14 +6,11 @@ describe('AES Encryption-Decryption', () => {
     const key = 'MySecretKey12345';
     const message = 'Very to secret message';
 
-    const aes = new AESImpl();
-    aes.init(key, key.length, aesConstants);
+    const aes = new AES(key);
     const salt = aes._salt;
-    const encryptedMessage = WordArray.stringifyBase64(aes.encryptMessage(message, aesConstants));
+    const encryptedMessage = WordArray.stringifyBase64(aes.encryptMessage(message));
 
-    const decryptedMessage = new AESImpl()
-      .init(key, key.length, aesConstants, salt)
-      .decryptMessage(WordArray.parseBase64(encryptedMessage), aesConstants);
+    const decryptedMessage = new AES(key, salt).decryptMessage(WordArray.parseBase64(encryptedMessage));
 
     expect(decryptedMessage).toBe(message);
   });
