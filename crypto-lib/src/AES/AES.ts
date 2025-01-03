@@ -6,12 +6,8 @@ import { NumberArrayToBinary } from '../Utils/printFormat';
 import { WordArray } from '../Utils/WordArray';
 import { AESConstants, aesConstants } from './AESConstants';
 import { KeyIVUtils } from './KeyIVUtils';
-interface AES {
-  createCipherKey(): number[];
-  encrypt: any;
-  decrypt: any;
-}
-export class AESImpl {
+
+export class AES {
   _nbRounds!: number;
   _key!: WordArray;
   _iv!: WordArray;
@@ -21,34 +17,20 @@ export class AESImpl {
 
   readonly paddingPKCS7: PKCS7Impl = new PKCS7Impl();
 
-  init(passwordUtf8: string, keySize: number, aesConstants: AESConstants, salt?: WordArray): AESImpl {
+  constructor(passwordUtf8: string, salt?: WordArray) {
     if (!salt) {
       salt = WordArray.random(64 / 8);
     }
     this._salt = salt;
-    const keyAndIV = new KeyIVUtils().computeDerivedKeyAndIV(passwordUtf8, keySize, 4, salt);
-    //const key = new WordArray([
-    //    653745428,
-    //    -162117686,
-    //    2145768267,
-    //    -1794206835,
-    //    278504082,
-    //    -801674998,
-    //    -1243076349,
-    //    -2119957319,
-    //    -2091216879,
-    //    -2003306387,
-    //    -222491591,
-    //    -1023359112,
-    //  ], 32)
-    this._iv = keyAndIV.iv; //new WordArray( [-2091216879,-2003306387,-222491591,-1023359112,], 16)//
+    const keyAndIV = new KeyIVUtils().computeDerivedKeyAndIV(passwordUtf8, passwordUtf8.length, 4, salt);
+    this._iv = keyAndIV.iv;
     this.updateState(keyAndIV.key, aesConstants);
     return this;
   }
 
-  updateState(
+  private updateState(
     key: WordArray,
-    aesConstants: AESConstants,
+    aesConsts: AESConstants,
   ): { key: WordArray; keySchedule: number[]; ikeySchedule: number[] } {
     if (this._nbRounds && this._key === key) {
       return { key: this._key, keySchedule: this._keySchedule, ikeySchedule: this._invKeySchedule };
@@ -60,19 +42,13 @@ export class AESImpl {
     const keySize = key.nbBytes / 4;
     const nbRounds = (this._nbRounds = keySize + 6);
     const ksRows = (nbRounds + 1) * 4;
-    const keySchedule = (this._keySchedule = this.computeKeySchedule(keyWords, keySize, ksRows, aesConstants));
-    const invKeySchedule = (this._invKeySchedule = this.computeInvKeySchedule(
-      keyWords,
-      keySize,
-      ksRows,
-      keySchedule,
-      aesConstants,
-    ));
+    const keySchedule = (this._keySchedule = this.computeKeySchedule(keyWords, keySize, ksRows, aesConsts));
+    const invKeySchedule = (this._invKeySchedule = this.computeInvKeySchedule(ksRows, keySchedule, aesConsts));
 
     return { key: key, keySchedule: keySchedule, ikeySchedule: invKeySchedule };
   }
 
-  computeKeySchedule(keyWords: number[], keySize: number, ksRows: number, aesConstants: AESConstants) {
+  computeKeySchedule(keyWords: number[], keySize: number, ksRows: number, aesConsts: AESConstants) {
     const keySchedule: Array<number> = (this._keySchedule = []);
     for (let ksRow = 0; ksRow < ksRows; ksRow++) {
       if (ksRow < keySize) {
@@ -86,20 +62,20 @@ export class AESImpl {
 
           // Sub word
           t =
-            (aesConstants.sbox[t >>> 24] << 24) |
-            (aesConstants.sbox[(t >>> 16) & 0xff] << 16) |
-            (aesConstants.sbox[(t >>> 8) & 0xff] << 8) |
-            aesConstants.sbox[t & 0xff];
+            (aesConsts.sbox[t >>> 24] << 24) |
+            (aesConsts.sbox[(t >>> 16) & 0xff] << 16) |
+            (aesConsts.sbox[(t >>> 8) & 0xff] << 8) |
+            aesConsts.sbox[t & 0xff];
 
           // Mix Rcon
-          t ^= aesConstants.rcon[(ksRow / keySize) | 0] << 24;
+          t ^= aesConsts.rcon[(ksRow / keySize) | 0] << 24;
         } else if (keySize > 6 && ksRow % keySize === 4) {
           // Sub word
           t =
-            (aesConstants.sbox[t >>> 24] << 24) |
-            (aesConstants.sbox[(t >>> 16) & 0xff] << 16) |
-            (aesConstants.sbox[(t >>> 8) & 0xff] << 8) |
-            aesConstants.sbox[t & 0xff];
+            (aesConsts.sbox[t >>> 24] << 24) |
+            (aesConsts.sbox[(t >>> 16) & 0xff] << 16) |
+            (aesConsts.sbox[(t >>> 8) & 0xff] << 8) |
+            aesConsts.sbox[t & 0xff];
         }
 
         keySchedule[ksRow] = keySchedule[ksRow - keySize] ^ t;
@@ -138,13 +114,7 @@ export class AESImpl {
     //})
   }
 
-  computeInvKeySchedule(
-    keyWords: number[],
-    keySize: number,
-    ksRows: number,
-    keySchedule: number[],
-    aesConstants: AESConstants,
-  ): number[] {
+  computeInvKeySchedule(ksRows: number, keySchedule: number[], aesConsts: AESConstants): number[] {
     const invKeySchedule: Array<number> = (this._invKeySchedule = []);
     for (let invKsRow = 0; invKsRow < ksRows; invKsRow++) {
       const ksRow = ksRows - invKsRow;
@@ -160,10 +130,10 @@ export class AESImpl {
         invKeySchedule[invKsRow] = t;
       } else {
         invKeySchedule[invKsRow] =
-          aesConstants.invSubMix0[aesConstants.sbox[t >>> 24]] ^
-          aesConstants.invSubMix1[aesConstants.sbox[(t >>> 16) & 0xff]] ^
-          aesConstants.invSubMix2[aesConstants.sbox[(t >>> 8) & 0xff]] ^
-          aesConstants.invSubMix3[aesConstants.sbox[t & 0xff]];
+          aesConsts.invSubMix0[aesConsts.sbox[t >>> 24]] ^
+          aesConsts.invSubMix1[aesConsts.sbox[(t >>> 16) & 0xff]] ^
+          aesConsts.invSubMix2[aesConsts.sbox[(t >>> 8) & 0xff]] ^
+          aesConsts.invSubMix3[aesConsts.sbox[t & 0xff]];
       }
     }
     return invKeySchedule;
@@ -298,15 +268,15 @@ export class AESImpl {
   encryptBlock(
     block: number[],
     prevBlockOrIv: number[],
-    aesConstants: AESConstants,
+    aesConsts: AESConstants,
   ): { prevBlock: number[]; rslt: number[] } {
     const xoredBlock = this.xorBlock(block, prevBlockOrIv);
     //console.log("xoredBlock: "+NumberArrayToBinary(xoredBlock) )
     const cypherText = this.cryptBlock(
       xoredBlock,
       this._keySchedule,
-      [aesConstants.subMix0, aesConstants.subMix1, aesConstants.subMix2, aesConstants.subMix3],
-      aesConstants.sbox,
+      [aesConsts.subMix0, aesConsts.subMix1, aesConsts.subMix2, aesConsts.subMix3],
+      aesConsts.sbox,
     );
     //console.log("cypherText: "+NumberArrayToBinary(cypherText) )
     return { prevBlock: cypherText, rslt: cypherText };
@@ -315,7 +285,7 @@ export class AESImpl {
   decryptBlock(
     block: number[],
     prevBlockOrIv: number[],
-    aesConstants: AESConstants,
+    aesConsts: AESConstants,
   ): { prevBlock: number[]; rslt: number[] } {
     const newBlock = [block[0], block[3], block[2], block[1]];
     //console.log("newBlock: "+NumberArrayToBinary(newBlock) )
@@ -323,8 +293,8 @@ export class AESImpl {
     const deciphered = this.cryptBlock(
       newBlock,
       this._invKeySchedule,
-      [aesConstants.invSubMix0, aesConstants.invSubMix1, aesConstants.invSubMix2, aesConstants.invSubMix3],
-      aesConstants.invSBox,
+      [aesConsts.invSubMix0, aesConsts.invSubMix1, aesConsts.invSubMix2, aesConsts.invSubMix3],
+      aesConsts.invSBox,
     );
     //console.log("deciphered: "+NumberArrayToBinary(deciphered) )
 
@@ -342,9 +312,9 @@ export class AESImpl {
     processBlock: (
       block: number[],
       prevBlockOrIv: number[],
-      aesConstants: AESConstants,
+      aesConsts: AESConstants,
     ) => { prevBlock: number[]; rslt: number[] },
-    aesConstants: AESConstants,
+    aesConsts: AESConstants,
     blockStartIndex: number = 0,
     processedWords: number[] = [],
     prevBlock: number[] = [],
@@ -354,13 +324,13 @@ export class AESImpl {
     const rslt: { prevBlock: number[]; rslt: number[] } = processBlock(
       message.words.slice(blockStartIndex, blockStartIndex + 4),
       prevBlockOrIv,
-      aesConstants,
+      aesConsts,
     );
     return this.processssssssRecurse(
       message,
       nBlocksReady,
       processBlock,
-      aesConstants,
+      aesConsts,
       blockStartIndex + 4,
       [...processedWords, ...rslt.rslt],
       rslt.prevBlock,
@@ -369,23 +339,23 @@ export class AESImpl {
 
   process(
     message: WordArray,
-    aesConstants: AESConstants,
+    aesConsts: AESConstants,
     processBlock: (
       block: number[],
       prevBlockOrIv: number[],
-      aesConstants: AESConstants,
+      aesConsts: AESConstants,
     ) => { prevBlock: number[]; rslt: number[] },
   ) {
     const blockSizeBytes = 16;
     const nBlocksReady = Math.ceil(message.nbBytes / blockSizeBytes);
     const nBytesReady = message.nbBytes;
-    const processedWords = this.processssssssRecurse(message, nBlocksReady, processBlock, aesConstants);
+    const processedWords = this.processssssssRecurse(message, nBlocksReady, processBlock, aesConsts);
 
     // Return processed words
     return new WordArray(processedWords, nBytesReady);
   }
 
-  encryptMessage(message: string, aesConstants: AESConstants): WordArray {
+  encryptMessage(message: string): WordArray {
     const waMessage: WordArray = WordArray.utf8StringToWordArray(message);
     //console.log("waMessage: "+NumberArrayToBinary(waMessage.words) )
     const padded: WordArray = this.paddingPKCS7.pad(waMessage, 16);
@@ -395,7 +365,7 @@ export class AESImpl {
     return processed;
   }
 
-  decryptMessage(cypheredMessage: WordArray, aesConstants: AESConstants): string {
+  decryptMessage(cypheredMessage: WordArray): string {
     const processed: WordArray = this.process(cypheredMessage, aesConstants, this.decryptBlock.bind(this));
     const unpadded: WordArray = this.paddingPKCS7.unpad(processed);
     const stringified: string = WordArray.stringifyUtf8(unpadded);
